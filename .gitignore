@@ -1,0 +1,8 @@
+izyPizy/data/izypizy.db
+izyPizy/backend/.env
+izyPizy/backend/.venv/
+izyPizy/frontend/node_modules/
+izyPizy/frontend/dist/
+__pycache__/
+*.pyc
+.DS_Store

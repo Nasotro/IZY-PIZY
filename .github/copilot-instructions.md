@@ -1,0 +1,1 @@
+After completing each atomic task or step, run `git add -A` and `git commit` with a short conventional commit message describing what was done (e.g. `feat: add dictionary schema`, `fix: correct pi slice validation`).
