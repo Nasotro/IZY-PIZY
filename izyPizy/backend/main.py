@@ -1,7 +1,18 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-app = FastAPI(title="IZY PIZY API")
+from database import init_db
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    await init_db()
+    yield
+
+
+app = FastAPI(title="IZY PIZY API", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
