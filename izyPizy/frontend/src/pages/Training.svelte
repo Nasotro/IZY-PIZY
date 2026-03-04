@@ -12,9 +12,8 @@
   let inputValue = '';
   let busy = false;
 
-  // Context: last 5 + 1 upcoming digits fetched from API
-  let contextDigits = ''; // string of up to 6 chars (5 past + current slot)
-  let contextStart = 0;
+  // All past digits from 0 to currentPosition
+  let allDigits = '';
 
   // Jump popover
   let jumpOpen = false;
@@ -33,14 +32,12 @@
   }
 
   async function fetchContext(pos) {
-    const start = Math.max(0, pos - 5);
-    const length = 6; // 5 past + current position slot
+    if (pos <= 0) { allDigits = ''; return; }
     try {
-      const data = await getPi(start, length);
-      contextDigits = data.digits;
-      contextStart = start;
+      const data = await getPi(0, pos);
+      allDigits = data.digits;
     } catch {
-      contextDigits = '';
+      allDigits = '';
     }
   }
 
@@ -113,12 +110,25 @@
     tick().then(() => inputEl?.focus());
   }
 
-  // Derive context display: up to 5 past digits + a placeholder for current slot
-  $: pastStart = Math.max(0, currentPosition - 5);
-  $: pastDigits = contextDigits.slice(
-    pastStart - contextStart,
-    currentPosition - contextStart
-  );
+  // Group all past digits into lines of 5 pairs (10 digits)
+  // Each line = array of pairs (2-char strings), last pair may be incomplete
+  /** @type {Array<Array<string>>} */
+  $: digitLines = (() => {
+    const lines = [];
+    for (let i = 0; i < allDigits.length; i += 10) {
+      const chunk = allDigits.slice(i, i + 10);
+      const pairs = [];
+      for (let j = 0; j < chunk.length; j += 2) {
+        pairs.push(chunk.slice(j, j + 2));
+      }
+      lines.push(pairs);
+    }
+    return lines;
+  })();
+
+  // Determine where the cursor "_" goes: which line and after which pair
+  $: cursorLineIndex = Math.floor(currentPosition / 10);
+  $: cursorInLinePos = currentPosition % 10; // 0-9 digit offset within that line
 
   onMount(() => {
     loadPosition();
@@ -139,12 +149,23 @@
     </p>
   </div>
 
-  <!-- Context: last 5 correct digits -->
-  <div class="flex items-end gap-1 h-10">
-    {#each pastDigits.split('') as d}
-      <span class="font-mono text-2xl text-gray-300 leading-none">{d}</span>
+  <!-- Context: all past digits grouped by pairs, 5 pairs per line -->
+  <div class="w-full space-y-1 overflow-y-auto max-h-40 rounded-xl bg-gray-50 px-3 py-2">
+    {#each digitLines as pairs, lineIdx}
+      <div class="flex gap-2 justify-center font-mono text-lg leading-tight">
+        {#each pairs as pair}
+          <span class="text-gray-400 tracking-widest">{pair}</span>
+        {/each}
+        {#if lineIdx === cursorLineIndex && pairs.length < 5}
+          <span class="text-indigo-400 animate-pulse">_</span>
+        {/if}
+      </div>
     {/each}
-    <span class="font-mono text-2xl text-gray-200 leading-none">_</span>
+    {#if digitLines.length === 0 || (digitLines.length > 0 && digitLines[digitLines.length - 1].length === 5 && cursorLineIndex >= digitLines.length)}
+      <div class="flex gap-2 justify-center font-mono text-lg leading-tight">
+        <span class="text-indigo-400 animate-pulse">_</span>
+      </div>
+    {/if}
   </div>
 
   <!-- Big input -->
