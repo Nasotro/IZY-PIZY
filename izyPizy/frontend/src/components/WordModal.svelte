@@ -4,7 +4,7 @@
   export let number = '';
   export let words = [];
   export let onClose = () => {};
-  export let onUpdate = () => {};
+  export let onUpdate = (_number) => {};
 
   let newWord = '';
   let editingId = null;
@@ -68,9 +68,11 @@
 <div
   class="fixed inset-0 z-40 bg-black/40"
   on:click={handleBackdropClick}
+  on:keydown={handleKeydown}
   role="dialog"
   aria-modal="true"
   aria-label="Words for {number}"
+  tabindex="-1"
 >
   <!-- Panel: bottom-sheet on mobile, centered modal on desktop -->
   <div
@@ -104,7 +106,6 @@
               class="rounded border border-indigo-300 px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
               bind:value={editingValue}
               on:keydown={(e) => e.key === 'Enter' && handleSaveEdit(w.id)}
-              autofocus
             />
             <button
               class="rounded bg-indigo-600 px-2 py-1 text-xs text-white hover:bg-indigo-700"
