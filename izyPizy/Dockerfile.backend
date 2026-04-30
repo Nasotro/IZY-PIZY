@@ -1,0 +1,17 @@
+FROM python:3.13-slim
+
+WORKDIR /app
+
+COPY izyPizy/backend/requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY izyPizy/backend/ .
+
+RUN mkdir -p /app/data
+
+ENV DATABASE_URL=/app/data/izypizy.db
+ENV PI_FILE=/app/data/pi.txt
+
+EXPOSE 8000
+
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
