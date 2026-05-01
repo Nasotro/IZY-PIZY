@@ -15,18 +15,14 @@
   let inputQueue = Promise.resolve();
   let digitsContainer;
 
-  // All past digits from 0 to currentPosition
   let allDigits = '';
   let displayDigits = '';
 
-  // Jump popover
   let jumpOpen = false;
   let jumpValue = '';
 
-  // Flash timeout handle
   let flashTimer;
 
-  // Settings
   let settingsOpen = false;
   let settings = {
     jumpEnabled: true,
@@ -34,17 +30,14 @@
     errorMode: false
   };
 
-  // Timer
   let timerRunning = false;
   let startTime = 0;
   let elapsedTime = 0;
   let timerInterval;
   let sessionStartTime = null;
 
-  // Error mode state
   let errorStopped = false;
 
-  // Loading state
   let loadingContext = false;
 
   function loadSettings() {
@@ -214,9 +207,6 @@
     tick().then(() => inputEl?.focus());
   }
 
-  // Group all past digits into lines of 5 pairs (10 digits)
-  // Each line = array of pairs (2-char strings), last pair may be incomplete
-  /** @type {Array<Array<string>>} */
   $: digitLines = (() => {
     const lines = [];
     for (let i = 0; i < displayDigits.length; i += 10) {
@@ -230,9 +220,8 @@
     return lines;
   })();
 
-  // Determine where the cursor "_" goes: which line and after which pair
   $: cursorLineIndex = Math.floor(currentPosition / 10);
-  $: cursorInLinePos = currentPosition % 10; // 0-9 digit offset within that line
+  $: cursorInLinePos = currentPosition % 10;
 
   onMount(async () => {
     loadSettings();
@@ -246,24 +235,21 @@
 </script>
 
 <div class="w-full mx-auto px-4 py-6 md:py-10 lg:py-12 flex flex-col items-center gap-5 md:gap-8">
-  <!-- Title -->
-  <h1 class="text-2xl md:text-3xl font-bold text-[#4A4036] self-start">🧠 Training</h1>
+  <h1 class="text-2xl md:text-3xl font-bold text-theme self-start">🧠 Training</h1>
 
-  <!-- Position counter -->
   <div class="w-full text-center">
-    <span class="text-sm md:text-base text-gray-500">Position</span>
-    <p class="text-5xl md:text-6xl lg:text-7xl font-mono font-bold text-[#C75B39] leading-none mt-1">
+    <span class="text-sm md:text-base" style="color: var(--color-muted);">Position</span>
+    <p class="text-5xl md:text-6xl lg:text-7xl font-mono font-bold text-theme-accent leading-none mt-1">
       {currentPosition}
     </p>
     {#if settings.timerMode}
-      <p class="text-2xl md:text-3xl font-mono font-bold text-[#4A4036] mt-2">
+      <p class="text-2xl md:text-3xl font-mono font-bold text-theme mt-2">
         {formatTime(elapsedTime)}
       </p>
     {/if}
   </div>
 
-  <!-- Context: all past digits grouped by pairs, 5 pairs per line -->
-  <div bind:this={digitsContainer} class="w-full space-y-1 overflow-y-auto max-h-40 md:max-h-48 lg:max-h-56 rounded-xl bg-[#F5F2EE] px-3 py-2 md:px-4 md:py-3">
+  <div bind:this={digitsContainer} class="w-full space-y-1 overflow-y-auto max-h-40 md:max-h-48 lg:max-h-56 rounded-xl px-3 py-2 md:px-4 md:py-3" style="background-color: var(--color-surface-alt);">
     {#if loadingContext}
       <div class="flex items-center justify-center py-4">
         <Loader size="sm" message="Loading digits..." />
@@ -272,22 +258,21 @@
     {#each digitLines as pairs, lineIdx}
       <div class="flex gap-2 md:gap-3 justify-center font-mono text-lg md:text-xl lg:text-2xl leading-tight">
         {#each pairs as pair}
-          <span class="text-[#4A4036]/40 tracking-widest">{pair}</span>
+          <span class="tracking-widest" style="color: var(--color-muted);">{pair}</span>
         {/each}
         {#if lineIdx === cursorLineIndex && pairs.length < 5}
-          <span class="text-[#C75B39]/60 animate-pulse">_</span>
+          <span class="animate-pulse" style="color: var(--color-accent);">_</span>
         {/if}
       </div>
     {/each}
     {#if digitLines.length === 0 || (digitLines.length > 0 && digitLines[digitLines.length - 1].length === 5 && cursorLineIndex >= digitLines.length)}
       <div class="flex gap-2 md:gap-3 justify-center font-mono text-lg md:text-xl lg:text-2xl leading-tight">
-        <span class="text-[#C75B39]/60 animate-pulse">_</span>
+        <span class="animate-pulse" style="color: var(--color-accent);">_</span>
       </div>
     {/if}
     {/if}
   </div>
 
-  <!-- Big input -->
   <div class="relative w-48 h-48 md:w-56 md:h-56 lg:w-64 lg:h-64">
     <input
       bind:this={inputEl}
@@ -299,37 +284,38 @@
       spellcheck="false"
       disabled={errorStopped}
       aria-label="Enter the next digit of pi"
-      class="w-full h-full rounded-3xl border-4 text-center text-6xl md:text-7xl lg:text-8xl font-mono font-bold outline-none transition-colors duration-150
+      class="w-full h-full rounded-3xl border-4 text-center text-6xl md:text-7xl lg:text-8xl font-mono font-bold outline-none transition-colors duration-150"
+      style="
         {errorStopped
-          ? 'border-red-300 bg-red-50 text-red-400'
+          ? 'border-color: var(--color-muted); background-color: var(--color-surface-alt); color: var(--color-muted);'
           : lastResult === 'correct'
-          ? 'border-green-400 bg-green-50 text-green-600'
+          ? 'border-color: var(--color-accent); background-color: var(--color-surface); color: var(--color-accent);'
           : lastResult === 'wrong'
-          ? 'border-red-400 bg-red-50 text-red-500'
-          : 'border-[#C75B39]/30 bg-[#FEFCF9] text-[#4A4036] focus:border-[#C75B39]'}"
+          ? 'border-color: #ef4444; background-color: var(--color-surface); color: #ef4444;'
+          : 'border-color: var(--color-accent); background-color: var(--color-surface); color: var(--color-secondary);'}
+      "
     />
   </div>
 
-  <!-- Feedback message -->
   <div class="h-8 md:h-10 text-center">
     {#if errorStopped}
-      <p class="text-red-600 font-bold text-xl md:text-2xl">Game Over!</p>
+      <p class="font-bold text-xl md:text-2xl" style="color: #ef4444;">Game Over!</p>
     {:else if lastResult === 'correct'}
-      <p class="w-full text-center text-lg md:text-xl font-semibold text-green-600 animate-pulse">✓ Correct!</p>
+      <p class="w-full text-center text-lg md:text-xl font-semibold animate-pulse" style="color: var(--color-accent);">✓ Correct!</p>
     {:else if lastResult === 'wrong'}
-      <p class="w-full text-center text-lg md:text-xl font-semibold text-red-500">
+      <p class="w-full text-center text-lg md:text-xl font-semibold" style="color: #ef4444;">
         ✗ Wrong! Expected: <span class="font-mono">{expectedDigit}</span>
       </p>
     {/if}
   </div>
 
-  <!-- Controls -->
   {#if errorStopped}
     <div class="flex flex-col items-center gap-4 w-full">
-      <p class="text-[#4A4036] text-base md:text-lg">You reached position <span class="font-bold text-[#C75B39]">{currentPosition}</span></p>
+      <p class="text-base md:text-lg">You reached position <span class="font-bold text-theme-accent">{currentPosition}</span></p>
       <button
         on:click={reset}
-        class="min-h-[44px] md:min-h-[48px] px-8 md:px-10 text-base md:text-lg font-semibold text-[#FEFCF9] bg-[#C75B39] rounded-xl hover:bg-[#A84829] transition-colors"
+        class="min-h-[44px] md:min-h-[48px] px-8 md:px-10 text-base md:text-lg font-semibold rounded-xl transition-colors"
+        style="color: var(--color-dominant); background-color: var(--color-accent);"
       >
         🔄 Restart
       </button>
@@ -338,31 +324,33 @@
     <div class="flex gap-3 w-full justify-center flex-wrap">
       <button
         on:click={reset}
-        class="min-h-[44px] md:min-h-[48px] px-6 md:px-8 text-sm md:text-base font-medium text-[#4A4036] border border-[#4A4036]/30 rounded-xl hover:bg-[#4A4036]/5 transition-colors"
+        class="min-h-[44px] md:min-h-[48px] px-6 md:px-8 text-sm md:text-base font-medium border rounded-xl hover:bg-theme-muted/5 transition-colors"
+        style="color: var(--color-secondary); border-color: var(--color-border-muted);"
       >
         Reset
       </button>
       {#if settings.jumpEnabled}
         <button
           on:click={openJump}
-          class="min-h-[44px] md:min-h-[48px] px-6 md:px-8 text-sm md:text-base font-medium text-[#C75B39] border border-[#C75B39]/30 rounded-xl hover:bg-[#C75B39]/5 transition-colors"
+          class="min-h-[44px] md:min-h-[48px] px-6 md:px-8 text-sm md:text-base font-medium border rounded-xl hover:bg-theme-accent/5 transition-colors"
+          style="color: var(--color-accent); border-color: var(--color-accent);"
         >
           Jump to…
         </button>
       {/if}
       <button
         on:click={() => { settingsOpen = !settingsOpen; }}
-        class="min-h-[44px] md:min-h-[48px] px-6 md:px-8 text-sm md:text-base font-medium text-[#4A4036] border border-[#4A4036]/30 rounded-xl hover:bg-[#4A4036]/5 transition-colors"
+        class="min-h-[44px] md:min-h-[48px] px-6 md:px-8 text-sm md:text-base font-medium border rounded-xl hover:bg-theme-muted/5 transition-colors"
+        style="color: var(--color-secondary); border-color: var(--color-border-muted);"
       >
         ⚙️ Settings
       </button>
     </div>
   {/if}
 
-  <!-- Jump popover -->
   {#if jumpOpen}
-    <div class="w-full rounded-2xl border border-[#C75B39]/20 bg-[#F5F2EE] p-5 md:p-6 shadow space-y-3">
-      <label class="block text-sm md:text-base font-medium text-[#4A4036]" for="jump-input">
+    <div class="w-full rounded-2xl border p-5 md:p-6 shadow space-y-3" style="border-color: var(--color-accent); background-color: var(--color-surface-alt);">
+      <label class="block text-sm md:text-base font-medium text-theme" for="jump-input">
         Jump to position (0–999)
       </label>
       <input
@@ -372,18 +360,21 @@
         max="999"
         bind:value={jumpValue}
         on:keydown={(e) => { if (e.key === 'Enter') confirmJump(); if (e.key === 'Escape') cancelJump(); }}
-        class="w-full min-h-[44px] md:min-h-[48px] rounded-lg border border-[#4A4036]/30 px-3 text-sm md:text-base focus:outline-none focus:ring-2 focus:ring-[#C75B39]/40"
+        class="w-full min-h-[44px] md:min-h-[48px] rounded-lg border px-3 text-sm md:text-base focus:outline-none focus:ring-2 focus:ring-theme-accent/40 bg-theme-surface"
+        style="border-color: var(--color-border-muted); color: var(--color-secondary);"
       />
       <div class="flex gap-3 justify-end">
         <button
           on:click={cancelJump}
-          class="min-h-[44px] md:min-h-[48px] px-4 md:px-5 text-sm md:text-base text-[#4A4036] border border-[#4A4036]/30 rounded-lg hover:bg-[#4A4036]/5"
+          class="min-h-[44px] md:min-h-[48px] px-4 md:px-5 text-sm md:text-base border rounded-lg hover:bg-theme-muted/5"
+          style="color: var(--color-secondary); border-color: var(--color-border-muted);"
         >
           Cancel
         </button>
         <button
           on:click={confirmJump}
-          class="min-h-[44px] md:min-h-[48px] px-4 md:px-5 text-sm md:text-base font-semibold text-[#FEFCF9] bg-[#C75B39] rounded-lg hover:bg-[#A84829]"
+          class="min-h-[44px] md:min-h-[48px] px-4 md:px-5 text-sm md:text-base font-semibold rounded-lg transition-colors"
+          style="color: var(--color-dominant); background-color: var(--color-accent);"
         >
           Go
         </button>
@@ -391,22 +382,23 @@
     </div>
   {/if}
 
-  <!-- Settings panel modal -->
   {#if settingsOpen}
     <div
-      class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4"
+      class="fixed inset-0 flex items-center justify-center z-50 p-4"
+      style="background-color: rgba(0,0,0,0.6);"
       on:click|self={() => settingsOpen = false}
       on:keydown={(e) => { if (e.key === 'Escape') settingsOpen = false; }}
       role="dialog"
       aria-modal="true"
       tabindex="-1"
     >
-      <div class="w-full max-w-md rounded-2xl border border-[#4A4036]/30 bg-[#FEFCF9] p-6 md:p-8 shadow-2xl space-y-6">
+      <div class="w-full max-w-md rounded-2xl border p-6 md:p-8 shadow-2xl space-y-6" style="border-color: var(--color-border-muted); background-color: var(--color-dominant);">
         <div class="flex items-center justify-between">
-          <h2 class="text-xl md:text-2xl font-bold text-[#4A4036]">Training Settings</h2>
+          <h2 class="text-xl md:text-2xl font-bold text-theme">Training Settings</h2>
           <button
             on:click={() => settingsOpen = false}
-            class="text-[#4A4036]/60 hover:text-[#4A4036] text-2xl leading-none"
+            class="leading-none text-2xl hover:opacity-70"
+            style="color: var(--color-muted);"
           >
             ×
           </button>
@@ -418,9 +410,10 @@
               type="checkbox"
               bind:checked={settings.jumpEnabled}
               on:change={saveSettings}
-              class="w-5 h-5 text-[#C75B39] rounded focus:ring-[#C75B39] bg-[#F5F2EE] border-[#4A4036]/30"
+              class="w-5 h-5 rounded focus:ring-2"
+              style="color: var(--color-accent); background-color: var(--color-surface-alt); border-color: var(--color-border-muted);"
             />
-            <span class="text-base text-[#4A4036]">Enable "Jump to" button</span>
+            <span class="text-base text-theme">Enable "Jump to" button</span>
           </label>
 
           <label class="flex items-center gap-3 cursor-pointer">
@@ -428,9 +421,10 @@
               type="checkbox"
               bind:checked={settings.timerMode}
               on:change={saveSettings}
-              class="w-5 h-5 text-[#C75B39] rounded focus:ring-[#C75B39] bg-[#F5F2EE] border-[#4A4036]/30"
+              class="w-5 h-5 rounded focus:ring-2"
+              style="color: var(--color-accent); background-color: var(--color-surface-alt); border-color: var(--color-border-muted);"
             />
-            <span class="text-base text-[#4A4036]">Timer mode (show timer & store results)</span>
+            <span class="text-base text-theme">Timer mode (show timer & store results)</span>
           </label>
 
           <label class="flex items-center gap-3 cursor-pointer">
@@ -438,15 +432,17 @@
               type="checkbox"
               bind:checked={settings.errorMode}
               on:change={saveSettings}
-              class="w-5 h-5 text-[#C75B39] rounded focus:ring-[#C75B39] bg-[#F5F2EE] border-[#4A4036]/30"
+              class="w-5 h-5 rounded focus:ring-2"
+              style="color: var(--color-accent); background-color: var(--color-surface-alt); border-color: var(--color-border-muted);"
             />
-            <span class="text-base text-[#4A4036]">Error mode (reset on wrong answer)</span>
+            <span class="text-base text-theme">Error mode (reset on wrong answer)</span>
           </label>
         </div>
 
         <button
           on:click={() => settingsOpen = false}
-          class="w-full min-h-[44px] md:min-h-[48px] text-base font-semibold text-[#FEFCF9] bg-[#C75B39] rounded-xl hover:bg-[#A84829] transition-colors"
+          class="w-full min-h-[44px] md:min-h-[48px] text-base font-semibold rounded-xl transition-colors"
+          style="color: var(--color-dominant); background-color: var(--color-accent);"
         >
           Done
         </button>

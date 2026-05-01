@@ -48,10 +48,11 @@
 
 <div class="w-full p-4 pb-24 sm:p-6 md:p-8 lg:p-10">
   <div class="flex items-center justify-between mb-4 md:mb-6">
-    <h1 class="text-2xl md:text-3xl font-bold text-[#4A4036]">Dictionary</h1>
+    <h1 class="text-2xl md:text-3xl font-bold text-theme">Dictionary</h1>
     <button
       on:click={() => isGridMode = !isGridMode}
-      class="px-3 py-1.5 text-sm font-medium text-[#C75B39] border border-[#C75B39]/30 rounded-lg hover:bg-[#C75B39]/5"
+      class="px-3 py-1.5 text-sm font-medium border rounded-lg hover:bg-theme-accent/5 transition-colors"
+      style="color: var(--color-accent); border-color: var(--color-accent);"
     >
       {isGridMode ? 'List' : 'Grid'}
     </button>
@@ -66,21 +67,18 @@
       {@const words = dictionary[num] ?? []}
       {@const isEmpty = words.length === 0}
       <button
-        class="flex flex-col items-center justify-center rounded-lg p-0.5 md:p-2 text-xs md:text-sm transition-colors
-               {isEmpty
-                 ? 'border border-dashed border-[#4A4036]/30 bg-[#F5F2EE] text-[#4A4036]/40 hover:bg-[#4A4036]/5'
-                 : 'border border-[#C75B39]/20 bg-[#C75B39]/5 text-[#4A4036] hover:bg-[#C75B39]/10'}"
-        style="min-height:2.5rem;"
+        class="flex flex-col items-center justify-center rounded-lg p-0.5 md:p-2 text-xs md:text-sm transition-colors"
+        style="min-height:2.5rem; {isEmpty ? 'border-style: dashed; border-color: var(--color-border-muted); background-color: var(--color-surface-alt); color: var(--color-muted);' : 'border-color: var(--color-accent); background-color: var(--color-surface); color: var(--color-secondary);'}"
         on:click={() => openModal(num)}
         aria-label="Edit words for {num}"
       >
         <span class="font-bold">{num}</span>
         {#if !isEmpty}
-          <span class="mt-0.5 w-full truncate px-0.5 text-[#C75B39]" title={words[0].word}>
+          <span class="mt-0.5 w-full truncate px-0.5" style="color: var(--color-accent);" title={words[0].word}>
             {words[0].word}
           </span>
         {:else}
-          <span class="mt-0.5 text-[#4A4036]/30">—</span>
+          <span class="mt-0.5" style="color: var(--color-muted);">—</span>
         {/if}
       </button>
     {/each}
@@ -88,56 +86,28 @@
   {:else}
     <!-- Linear list -->
     <div class="space-y-2">
-      {#each pairs as num}
-        {@const words = dictionary[num] ?? []}
-        {@const isEmpty = words.length === 0}
-        <button
-          class="w-full flex items-center justify-between px-4 py-3 rounded-lg text-left transition-colors
-                 {isEmpty
-                   ? 'border border-dashed border-[#4A4036]/30 bg-[#F5F2EE] text-[#4A4036]/40'
-                   : 'border border-[#4A4036]/20 bg-white text-[#4A4036] hover:bg-[#F5F2EE]'}"
-          on:click={() => openModal(num)}
-          aria-label="Edit words for {num}"
-        >
-          <span class="font-bold text-[#C75B39] w-12">{num}</span>
-          <span class="flex-1 truncate">
-            {#if !isEmpty}
-              {words.map(w => w.word).join(', ')}
-            {:else}
-              <span class="text-[#4A4036]/30">—</span>
-            {/if}
-          </span>
-          <span class="text-[#4A4036]/40 ml-2">→</span>
-        </button>
-      {/each}
-</div>
-    {:else}
-    <!-- Linear list -->
-    <div class="space-y-2">
     {#each pairs as num}
       {@const words = dictionary[num] ?? []}
       {@const isEmpty = words.length === 0}
       <button
-        class="w-full flex items-center justify-between px-4 py-3 rounded-lg text-left transition-colors
-               {isEmpty
-                 ? 'border border-dashed border-[#4A4036]/30 bg-[#F5F2EE] text-[#4A4036]/40'
-                 : 'border border-[#4A4036]/20 bg-white text-[#4A4036] hover:bg-[#4A4036]/5'}"
+        class="w-full flex items-center justify-between px-4 py-3 rounded-lg text-left transition-colors"
+        style="{isEmpty ? 'border-style: dashed; border-color: var(--color-border-muted); background-color: var(--color-surface-alt); color: var(--color-muted);' : 'border-color: var(--color-border-muted); background-color: var(--color-surface); color: var(--color-secondary);'}"
         on:click={() => openModal(num)}
         aria-label="Edit words for {num}"
       >
-        <span class="font-bold text-[#C75B39] w-12">{num}</span>
+        <span class="font-bold w-12" style="color: var(--color-accent);">{num}</span>
         <span class="flex-1 truncate">
           {#if !isEmpty}
             {words.map(w => w.word).join(', ')}
           {:else}
-            <span class="text-[#4A4036]/30">—</span>
+            <span style="color: var(--color-muted);">—</span>
           {/if}
         </span>
-        <span class="text-[#4A4036]/40 ml-2">→</span>
+        <span class="ml-2" style="color: var(--color-muted);">→</span>
       </button>
     {/each}
-    </div>
-    {/if}
+</div>
+  {/if}
 </div>
 
 {#if modalNumber !== null}

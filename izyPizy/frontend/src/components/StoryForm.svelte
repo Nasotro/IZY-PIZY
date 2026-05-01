@@ -78,15 +78,15 @@
   }
 </script>
 
-<div class="rounded-2xl border border-[#C75B39]/20 bg-[#F5F2EE] p-5 shadow-sm">
-  <h2 class="text-lg font-bold text-[#4A4036] mb-4">
+<div class="rounded-2xl border border-[#C75B39]/20 bg-theme-surface p-5 shadow-sm">
+  <h2 class="text-lg font-bold text-theme mb-4">
     {isEdit ? 'Edit Story' : 'Add Story'}
   </h2>
 
   <form on:submit|preventDefault={handleSubmit} class="space-y-4">
     <!-- Pi digit preview -->
-    <div class="rounded-lg bg-white border border-[#4A4036]/10 px-4 py-3 md:px-5 md:py-4">
-      <p class="text-xs md:text-sm text-[#4A4036]/60 mb-2">
+    <div class="rounded-lg bg-theme-surface-alt border border-theme-muted/10 px-4 py-3 md:px-5 md:py-4">
+      <p class="text-xs md:text-sm text-theme-muted mb-2">
         Pi digits for position {position}&nbsp;
         (digits {position * 10 + 1}–{position * 10 + 10}):
       </p>
@@ -95,7 +95,7 @@
       {:else}
         <div class="grid grid-cols-5 gap-1 md:gap-2 text-center">
           {#each pairs as pair, i}
-            <span class="font-mono text-sm md:text-base font-bold text-[#C75B39] bg-[#C75B39]/5 rounded px-1 py-0.5">
+            <span class="font-mono text-sm md:text-base font-bold text-theme-accent bg-theme-accent/5 rounded px-1 py-0.5">
               {pair}
             </span>
           {/each}
@@ -106,35 +106,35 @@
     <!-- 5 word inputs -->
     <div class="grid grid-cols-5 gap-2 md:gap-3">
       <div class="flex flex-col items-center gap-1">
-        <span class="font-mono text-xs md:text-sm text-[#4A4036]/40">{pairs[0]}</span>
+        <span class="font-mono text-xs md:text-sm text-theme-muted/40">{pairs[0]}</span>
         <input type="text" bind:value={word_0} placeholder="Word 1"
-          class="w-full min-h-[44px] md:min-h-[48px] rounded-lg border border-[#4A4036]/30 px-2 py-2 text-sm md:text-base text-center focus:outline-none focus:ring-2 focus:ring-[#C75B39]/40" />
+          class="w-full min-h-[44px] md:min-h-[48px] rounded-lg border border-theme-muted/30 px-2 py-2 text-sm md:text-base text-center bg-theme-surface focus:outline-none focus:ring-2 focus:ring-theme-accent/40" style="color: var(--color-secondary);" />
       </div>
       <div class="flex flex-col items-center gap-1">
-        <span class="font-mono text-xs md:text-sm text-[#4A4036]/40">{pairs[1]}</span>
+        <span class="font-mono text-xs md:text-sm text-theme-muted/40">{pairs[1]}</span>
         <input type="text" bind:value={word_1} placeholder="Word 2"
-          class="w-full min-h-[44px] md:min-h-[48px] rounded-lg border border-[#4A4036]/30 px-2 py-2 text-sm md:text-base text-center focus:outline-none focus:ring-2 focus:ring-[#C75B39]/40" />
+          class="w-full min-h-[44px] md:min-h-[48px] rounded-lg border border-theme-muted/30 px-2 py-2 text-sm md:text-base text-center bg-theme-surface focus:outline-none focus:ring-2 focus:ring-theme-accent/40" style="color: var(--color-secondary);" />
       </div>
       <div class="flex flex-col items-center gap-1">
-        <span class="font-mono text-xs md:text-sm text-[#4A4036]/40">{pairs[2]}</span>
+        <span class="font-mono text-xs md:text-sm text-theme-muted/40">{pairs[2]}</span>
         <input type="text" bind:value={word_2} placeholder="Word 3"
-          class="w-full min-h-[44px] md:min-h-[48px] rounded-lg border border-[#4A4036]/30 px-2 py-2 text-sm md:text-base text-center focus:outline-none focus:ring-2 focus:ring-[#C75B39]/40" />
+          class="w-full min-h-[44px] md:min-h-[48px] rounded-lg border border-theme-muted/30 px-2 py-2 text-sm md:text-base text-center bg-theme-surface focus:outline-none focus:ring-2 focus:ring-theme-accent/40" style="color: var(--color-secondary);" />
       </div>
       <div class="flex flex-col items-center gap-1">
-        <span class="font-mono text-xs md:text-sm text-[#4A4036]/40">{pairs[3]}</span>
+        <span class="font-mono text-xs md:text-sm text-theme-muted/40">{pairs[3]}</span>
         <input type="text" bind:value={word_3} placeholder="Word 4"
-          class="w-full min-h-[44px] md:min-h-[48px] rounded-lg border border-[#4A4036]/30 px-2 py-2 text-sm md:text-base text-center focus:outline-none focus:ring-2 focus:ring-[#C75B39]/40" />
+          class="w-full min-h-[44px] md:min-h-[48px] rounded-lg border border-theme-muted/30 px-2 py-2 text-sm md:text-base text-center bg-theme-surface focus:outline-none focus:ring-2 focus:ring-theme-accent/40" style="color: var(--color-secondary);" />
       </div>
       <div class="flex flex-col items-center gap-1">
-        <span class="font-mono text-xs md:text-sm text-[#4A4036]/40">{pairs[4]}</span>
+        <span class="font-mono text-xs md:text-sm text-theme-muted/40">{pairs[4]}</span>
         <input type="text" bind:value={word_4} placeholder="Word 5"
-          class="w-full min-h-[44px] md:min-h-[48px] rounded-lg border border-[#4A4036]/30 px-2 py-2 text-sm md:text-base text-center focus:outline-none focus:ring-2 focus:ring-[#C75B39]/40" />
+          class="w-full min-h-[44px] md:min-h-[48px] rounded-lg border border-theme-muted/30 px-2 py-2 text-sm md:text-base text-center bg-theme-surface focus:outline-none focus:ring-2 focus:ring-theme-accent/40" style="color: var(--color-secondary);" />
       </div>
     </div>
 
     <!-- Sentence -->
     <div>
-      <label class="block text-sm md:text-base font-medium text-[#4A4036] mb-1 md:mb-2" for="sentence">
+      <label class="block text-sm md:text-base font-medium text-theme mb-1 md:mb-2" for="sentence">
         Sentence (optional)
       </label>
       <textarea
@@ -142,7 +142,8 @@
         bind:value={sentence}
         rows="2"
         placeholder="A short story linking the 5 words…"
-        class="w-full rounded-lg border border-[#4A4036]/30 px-3 py-2 text-sm md:text-base focus:outline-none focus:ring-2 focus:ring-[#C75B39]/40 resize-none"
+        class="w-full rounded-lg border border-theme-muted/30 px-3 py-2 text-sm md:text-base bg-theme-surface focus:outline-none focus:ring-2 focus:ring-theme-accent/40 resize-none"
+        style="color: var(--color-secondary);"
       ></textarea>
     </div>
 
@@ -155,14 +156,16 @@
       <button
         type="button"
         on:click={onCancel}
-        class="min-h-[44px] md:min-h-[48px] px-5 md:px-6 text-sm md:text-base font-medium text-[#4A4036] border border-[#4A4036]/30 rounded-lg hover:bg-[#4A4036]/5 transition-colors"
+        class="min-h-[44px] md:min-h-[48px] px-5 md:px-6 text-sm md:text-base font-medium border rounded-lg hover:bg-theme-muted/5 transition-colors"
+        style="color: var(--color-secondary); border-color: var(--color-border-muted);"
       >
         Cancel
       </button>
       <button
         type="submit"
         disabled={saving}
-        class="min-h-[44px] md:min-h-[48px] px-5 md:px-6 text-sm md:text-base font-semibold text-[#FEFCF9] bg-[#C75B39] rounded-lg hover:bg-[#A84829] disabled:opacity-50 transition-colors"
+        class="min-h-[44px] md:min-h-[48px] px-5 md:px-6 text-sm md:text-base font-semibold rounded-lg hover:disabled:opacity-50 transition-colors"
+        style="color: var(--color-dominant); background-color: var(--color-accent);"
       >
         {saving ? 'Saving…' : isEdit ? 'Save changes' : 'Add story'}
       </button>

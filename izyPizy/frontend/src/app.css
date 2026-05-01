@@ -6,11 +6,13 @@
   .bg-theme { background-color: var(--color-dominant); }
   .bg-theme-secondary { background-color: var(--color-bg-secondary); }
   .bg-theme-tertiary { background-color: var(--color-bg-tertiary); }
+  .bg-theme-surface { background-color: var(--color-surface); }
+  .bg-theme-surface-alt { background-color: var(--color-surface-alt); }
   .text-theme { color: var(--color-secondary); }
   .text-theme-muted { color: var(--color-muted); }
   .text-theme-accent { color: var(--color-accent); }
-  .border-theme { border-color: var(--color-secondary); }
-  .border-theme-muted { border-color: var(--color-muted); }
+  .border-theme { border-color: var(--color-border); }
+  .border-theme-muted { border-color: var(--color-border-muted); }
 }
 
 :root {
@@ -30,6 +32,10 @@
   --color-muted: #8A7F75;
   --color-bg-secondary: #F5F2EE;
   --color-bg-tertiary: #FFFFFF;
+  --color-surface: #FFFFFF;
+  --color-surface-alt: #F5F2EE;
+  --color-border: #4A4036;
+  --color-border-muted: #4A4036;
 }
 
 [data-theme="dark"] {
@@ -40,6 +46,10 @@
   --color-muted: #8A7F75;
   --color-bg-secondary: #2A2522;
   --color-bg-tertiary: #252220;
+  --color-surface: #252220;
+  --color-surface-alt: #2A2522;
+  --color-border: #8A7F75;
+  --color-border-muted: #4A4036;
 }
 
 a {

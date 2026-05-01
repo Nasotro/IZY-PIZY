@@ -76,11 +76,12 @@
 
 <div class="w-full mx-auto px-4 py-6 md:py-8 lg:py-10 space-y-6 md:space-y-8">
   <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 md:gap-4">
-    <h1 class="text-2xl md:text-3xl font-bold text-[#4A4036]">📖 Story Book</h1>
+    <h1 class="text-2xl md:text-3xl font-bold text-theme">📖 Story Book</h1>
     {#if formMode === null}
       <button
         on:click={openCreate}
-        class="min-h-[44px] md:min-h-[48px] px-5 md:px-6 text-sm md:text-base font-semibold text-[#FEFCF9] bg-[#C75B39] rounded-xl hover:bg-[#A84829] transition-colors shadow-sm"
+        class="min-h-[44px] md:min-h-[48px] px-5 md:px-6 text-sm md:text-base font-semibold rounded-xl transition-colors shadow-sm"
+        style="color: var(--color-dominant); background-color: var(--color-accent);"
       >
         + Add Story
       </button>
@@ -96,7 +97,7 @@
   {:else if error}
     <p class="text-center text-red-500 py-12 md:py-16 text-base md:text-lg">{error}</p>
   {:else if stories.length === 0}
-    <div class="text-center py-16 md:py-20 text-gray-400">
+    <div class="text-center py-16 md:py-20" style="color: var(--color-muted);">
       <p class="text-4xl md:text-5xl mb-3">📭</p>
       <p class="text-lg md:text-xl font-medium">No stories yet.</p>
       <p class="text-sm md:text-base mt-1">Click <span class="font-semibold">+ Add Story</span> to create one.</p>
