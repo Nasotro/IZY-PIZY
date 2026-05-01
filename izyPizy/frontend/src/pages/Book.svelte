@@ -3,26 +3,23 @@
   import { getStories, deleteStory, getPi } from '../lib/api.js';
   import StoryCard from '../components/StoryCard.svelte';
   import StoryForm from '../components/StoryForm.svelte';
+  import Loader from '../components/Loader.svelte';
 
-  /** @type {Array<object>} */
   let stories = [];
-
-  /** @type {Map<number, string>} position → 10-digit string */
   let piCache = new Map();
-
   let loading = true;
   let error = '';
 
-  // Form state: null = hidden, 'create' = new, object = edit
   let formMode = null;
-  /** @type {object|null} */
   let editingStory = null;
+  let nextPosition = 0;
 
   async function loadStories() {
     loading = true;
     error = '';
     try {
       stories = await getStories();
+      nextPosition = stories.length > 0 ? Math.max(...stories.map(s => s.position)) + 1 : 0;
       await prefetchPi(stories);
     } catch (e) {
       error = e.message;
@@ -41,7 +38,7 @@
         }
       })
     );
-    piCache = piCache; // trigger reactivity
+    piCache = piCache;
   }
 
   function openCreate() {
@@ -77,42 +74,35 @@
   onMount(loadStories);
 </script>
 
-<div class="max-w-2xl mx-auto px-4 py-6 space-y-6">
-  <!-- Header -->
-  <div class="flex items-center justify-between">
-    <h1 class="text-2xl font-bold text-gray-800">📖 Story Book</h1>
+<div class="w-full mx-auto px-4 py-6 md:py-8 lg:py-10 space-y-6 md:space-y-8">
+  <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 md:gap-4">
+    <h1 class="text-2xl md:text-3xl font-bold text-[#4A4036]">📖 Story Book</h1>
     {#if formMode === null}
       <button
         on:click={openCreate}
-        class="min-h-[44px] px-5 text-sm font-semibold text-white bg-indigo-600 rounded-xl hover:bg-indigo-700 transition-colors shadow-sm"
+        class="min-h-[44px] md:min-h-[48px] px-5 md:px-6 text-sm md:text-base font-semibold text-[#FEFCF9] bg-[#C75B39] rounded-xl hover:bg-[#A84829] transition-colors shadow-sm"
       >
         + Add Story
       </button>
     {/if}
   </div>
 
-  <!-- Form (create or edit) -->
   {#if formMode !== null}
-    <StoryForm
-      story={editingStory}
-      onSave={handleSave}
-      onCancel={closeForm}
-    />
+    <StoryForm story={editingStory} nextPosition={formMode === 'create' ? nextPosition : undefined} onSave={handleSave} onCancel={closeForm} />
   {/if}
 
-  <!-- Loading / error -->
   {#if loading}
-    <p class="text-center text-gray-400 py-12">Loading stories…</p>
+    <Loader message="Loading stories..." />
   {:else if error}
-    <p class="text-center text-red-500 py-12">{error}</p>
+    <p class="text-center text-red-500 py-12 md:py-16 text-base md:text-lg">{error}</p>
   {:else if stories.length === 0}
-    <div class="text-center py-16 text-gray-400">
-      <p class="text-4xl mb-3">📭</p>
-      <p class="text-lg font-medium">No stories yet.</p>
-      <p class="text-sm mt-1">Click <span class="font-semibold">+ Add Story</span> to create one.</p>
+    <div class="text-center py-16 md:py-20 text-gray-400">
+      <p class="text-4xl md:text-5xl mb-3">📭</p>
+      <p class="text-lg md:text-xl font-medium">No stories yet.</p>
+      <p class="text-sm md:text-base mt-1">Click <span class="font-semibold">+ Add Story</span> to create one.</p>
     </div>
   {:else}
-    <div class="space-y-4">
+    <div class="space-y-4 md:space-y-6">
       {#each stories as story (story.id)}
         <StoryCard
           {story}

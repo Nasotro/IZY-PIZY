@@ -2,7 +2,7 @@ from pydantic import BaseModel
 
 
 class StoryCreate(BaseModel):
-    position: int
+    position: int | None = None
     sentence: str | None = None
     word_0: str
     word_1: str
