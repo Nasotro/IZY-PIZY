@@ -66,19 +66,19 @@ async def get_stories(
     return [_row_to_story(r) for r in rows]
 
 
-async def _ensure_word_exists(db: Connection, number: str, word: str) -> None:
+async def _ensure_word_exists(db: Connection, user_id: str, number: str, word: str) -> None:
     word = word.strip()
     if not word:
         return
     async with db.execute(
-        "SELECT id FROM dictionary_words WHERE number = ? AND word = ?",
-        (number, word),
+        "SELECT id FROM dictionary_words WHERE user_id = ? AND number = ? AND word = ?",
+        (user_id, number, word),
     ) as cursor:
         if await cursor.fetchone() is not None:
             return
     await db.execute(
-        "INSERT INTO dictionary_words (number, word) VALUES (?, ?)",
-        (number, word),
+        "INSERT INTO dictionary_words (user_id, number, word) VALUES (?, ?, ?)",
+        (user_id, number, word),
     )
 
 
@@ -102,7 +102,7 @@ async def create_story(
     words = [body.word_0, body.word_1, body.word_2, body.word_3, body.word_4]
 
     for number, word in zip(numbers, words):
-        await _ensure_word_exists(db, number, word)
+        await _ensure_word_exists(db, user_id, number, word)
     await db.commit()
 
     async with db.execute(
