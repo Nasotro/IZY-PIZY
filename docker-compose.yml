@@ -6,7 +6,8 @@ services:
     expose:
       - "8000"
     volumes:
-      - ./izyPizy/data:/app/data
+      - app-data:/app/data
+    user: "0:0"
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health')"]
       interval: 30s

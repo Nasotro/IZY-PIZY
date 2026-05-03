@@ -7,11 +7,11 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY izyPizy/backend/ .
 
-RUN addgroup --system app && adduser --system --ingroup app app
-
 RUN mkdir -p /app/data
 COPY izyPizy/data/pi.txt /app/data/pi.txt
-RUN chown -R app:app /app
+
+RUN addgroup --system app && adduser --system --ingroup app app \
+    && chown -R app:app /app
 
 USER app
 
