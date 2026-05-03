@@ -4,7 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from database import init_db
-from routers import pi, dictionary, stories, training
+from routers import pi, dictionary, stories, training, auth
 
 
 @asynccontextmanager
@@ -26,6 +26,7 @@ app.include_router(pi.router, prefix="/api")
 app.include_router(dictionary.router, prefix="/api")
 app.include_router(stories.router, prefix="/api")
 app.include_router(training.router, prefix="/api")
+app.include_router(auth.router, prefix="/api")
 
 
 @app.get("/api/health")

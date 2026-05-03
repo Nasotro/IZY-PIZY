@@ -3,6 +3,9 @@
   import { onMount } from 'svelte';
   import { onDestroy } from 'svelte';
   import { createEventDispatcher } from 'svelte';
+  import { signOut } from "firebase/auth";
+  import { auth } from "../lib/firebase.js";
+  import { user } from "../lib/auth.js";
 
   export let isDesktop = false;
 
@@ -23,6 +26,11 @@
     darkMode = !darkMode;
     document.documentElement.setAttribute('data-theme', darkMode ? 'dark' : 'light');
     localStorage.setItem('izipizy_theme', darkMode ? 'dark' : 'light');
+  }
+
+  async function logout() {
+    await signOut(auth);
+    user.set(null);
   }
 
   function checkScreen() {
@@ -63,14 +71,34 @@
     {/each}
   </div>
   
-  <button
-    on:click={toggleTheme}
-    class="flex items-center justify-center w-10 h-10 rounded-lg transition-colors"
-    style="color: var(--color-secondary);"
-    title={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
-  >
-    <span class="text-xl">{darkMode ? '☀️' : '🌙'}</span>
-  </button>
+  <div class="flex items-center gap-3">
+    {#if $user}
+      <img src={$user.photoURL} alt="Profile" class="w-8 h-8 rounded-full" />
+      <button
+        on:click={logout}
+        class="text-sm font-medium px-3 py-2 rounded-lg hover:bg-gray-100"
+        style="color: var(--color-secondary);"
+      >
+        Déconnexion
+      </button>
+    {:else}
+      <a
+        href="#/login"
+        class="text-sm font-medium px-4 py-2 rounded-lg"
+        style="background-color: var(--color-accent); color: white;"
+      >
+        Connexion
+      </a>
+    {/if}
+    <button
+      on:click={toggleTheme}
+      class="flex items-center justify-center w-10 h-10 rounded-lg transition-colors"
+      style="color: var(--color-secondary);"
+      title={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+    >
+      <span class="text-xl">{darkMode ? '☀️' : '🌙'}</span>
+    </button>
+  </div>
 </nav>
 {:else}
 <!-- Mobile: fixed bottom bar -->
@@ -85,14 +113,24 @@
       <span class="text-sm mt-1">{label}</span>
     </a>
   {/each}
-  <button
-    on:click={toggleTheme}
-    class="flex flex-col items-center justify-center flex-1"
-    style="color: var(--color-muted)"
-    title={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
-  >
-    <span class="text-2xl leading-none">{darkMode ? '☀️' : '🌙'}</span>
-    <span class="text-xs mt-1">{darkMode ? 'Light' : 'Dark'}</span>
-  </button>
+  {#if $user}
+    <button
+      on:click={logout}
+      class="flex flex-col items-center justify-center flex-1"
+      style="color: var(--color-muted)"
+    >
+      <span class="text-2xl leading-none">🚪</span>
+      <span class="text-xs mt-1">Logout</span>
+    </button>
+  {:else}
+    <a
+      href="#/login"
+      class="flex flex-col items-center justify-center flex-1"
+      style="color: var(--color-muted)"
+    >
+      <span class="text-2xl leading-none">🔐</span>
+      <span class="text-xs mt-1">Login</span>
+    </a>
+  {/if}
 </nav>
 {/if}

@@ -6,3 +6,6 @@ izyPizy/frontend/dist/
 __pycache__/
 *.pyc
 .DS_Store
+
+izy-pizy-firebase-adminsdk.json
+izyPizy/backend/firebase-creds.json

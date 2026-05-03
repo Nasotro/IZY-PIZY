@@ -1,8 +1,25 @@
+import { getIdToken } from "firebase/auth";
+import { auth } from "./firebase.js";
+
 const BASE = '/api';
 
-async function apiFetch(path, options = {}) {
+export let currentToken = null;
+
+export async function apiFetch(path, options = {}) {
+  const headers = { 'Content-Type': 'application/json', ...options.headers };
+  
+  if (auth.currentUser) {
+    try {
+      const token = await getIdToken(auth.currentUser);
+      currentToken = token;
+      headers['Authorization'] = `Bearer ${token}`;
+    } catch (e) {
+      console.warn('Failed to get token:', e);
+    }
+  }
+
   const res = await fetch(`${BASE}${path}`, {
-    headers: { 'Content-Type': 'application/json', ...options.headers },
+    headers,
     ...options,
   });
   if (!res.ok) {
