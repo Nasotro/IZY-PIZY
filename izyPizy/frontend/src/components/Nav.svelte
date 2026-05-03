@@ -1,13 +1,14 @@
 <script>
-  import { location } from 'svelte-spa-router';
   import { onMount } from 'svelte';
-  import { onDestroy } from 'svelte';
-  import { createEventDispatcher } from 'svelte';
   import { signOut } from "firebase/auth";
   import { auth } from "../lib/firebase.js";
   import { user } from "../lib/auth.js";
 
   export let isDesktop = false;
+
+  let darkMode = false;
+  let currentRoute = window?.location?.hash?.slice(1) || '/';
+  let tick = 0;
 
   const links = [
     { to: '/',           label: 'Home',       icon: '🏠' },
@@ -16,10 +17,8 @@
     { to: '/book',       label: 'Book',       icon: '📚' },
   ];
 
-  let darkMode = false;
-
-  function isActive(current, to) {
-    return to === '/' ? current === '/' : current.startsWith(to);
+  function isActive(to) {
+    return to === '/' ? currentRoute === '/' : currentRoute.startsWith(to);
   }
 
   function toggleTheme() {
@@ -31,29 +30,29 @@
   async function logout() {
     await signOut(auth);
     user.set(null);
-  }
-
-  function checkScreen() {
-    isDesktop = window.innerWidth >= 1024;
+    window.location.hash = '#/';
   }
 
   onMount(() => {
     const saved = localStorage.getItem('izipizy_theme');
     darkMode = saved === 'dark';
     document.documentElement.setAttribute('data-theme', darkMode ? 'dark' : 'light');
-    checkScreen();
-    window.addEventListener('resize', checkScreen);
-  });
-
-  onDestroy(() => {
-    if (typeof window !== 'undefined') {
-      window.removeEventListener('resize', checkScreen);
+    
+    function updateRoute() {
+      currentRoute = window.location.hash.slice(1) || '/';
+      tick++;
     }
+    
+    window.addEventListener('hashchange', updateRoute);
+    
+    return () => {
+      window.removeEventListener('hashchange', updateRoute);
+    };
   });
 </script>
 
+{#key tick}
 {#if isDesktop}
-<!-- Desktop: fixed top bar -->
 <nav style="display: flex; align-items: center; justify-content: space-between; position: fixed; top: 0; left: 0; right: 0; z-index: 50; background-color: var(--color-bg-secondary); border-bottom: 2px solid var(--color-muted); height: 5rem; padding: 0 1.5rem; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
   
   <a href="#/" class="font-bold text-xl" style="color: var(--color-accent);">IZY PIZY 🥧</a>
@@ -63,7 +62,7 @@
       <a
         href="#{to}"
         class="flex items-center gap-3 text-lg font-medium px-6 py-3 rounded-lg transition-colors"
-        style="color: {isActive($location, to) ? 'var(--color-accent)' : 'var(--color-secondary)'}; background-color: {isActive($location, to) ? 'rgba(199, 91, 57, 0.1)' : 'transparent'};"
+        style="color: {isActive(to) ? 'var(--color-accent)' : 'var(--color-secondary)'}; background-color: {isActive(to) ? 'rgba(199, 91, 57, 0.1)' : 'transparent'};"
       >
         <span class="text-base">{icon}</span>
         <span>{label}</span>
@@ -75,7 +74,7 @@
     {#if $user}
       <img src={$user.photoURL} alt="Profile" class="w-8 h-8 rounded-full" />
       <button
-        on:click={logout}
+        onclick={logout}
         class="text-sm font-medium px-3 py-2 rounded-lg hover:bg-gray-100"
         style="color: var(--color-secondary);"
       >
@@ -91,7 +90,7 @@
       </a>
     {/if}
     <button
-      on:click={toggleTheme}
+      onclick={toggleTheme}
       class="flex items-center justify-center w-10 h-10 rounded-lg transition-colors"
       style="color: var(--color-secondary);"
       title={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
@@ -101,13 +100,12 @@
   </div>
 </nav>
 {:else}
-<!-- Mobile: fixed bottom bar -->
 <nav style="position: fixed; bottom: 0; left: 0; right: 0; z-index: 50; display: flex; background-color: var(--color-bg-secondary); border-top: 2px solid var(--color-muted); height: 5rem; padding: 0.5rem;">
   {#each links as { to, label, icon }}
     <a
       href="#{to}"
       class="flex flex-col items-center justify-center flex-1"
-      style="color: {isActive($location, to) ? 'var(--color-accent)' : 'var(--color-muted)'}"
+      style="color: {isActive(to) ? 'var(--color-accent)' : 'var(--color-muted)'}"
     >
       <span class="text-4xl leading-none">{icon}</span>
       <span class="text-sm mt-1">{label}</span>
@@ -115,7 +113,7 @@
   {/each}
   {#if $user}
     <button
-      on:click={logout}
+      onclick={logout}
       class="flex flex-col items-center justify-center flex-1"
       style="color: var(--color-muted)"
     >
@@ -134,3 +132,4 @@
   {/if}
 </nav>
 {/if}
+{/key}
