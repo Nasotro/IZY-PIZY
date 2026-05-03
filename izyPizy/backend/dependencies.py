@@ -1,18 +1,15 @@
-from fastapi import APIRouter, Header, HTTPException
+from fastapi import Depends, Header, HTTPException
 from firebase_admin import auth
 from pydantic import BaseModel
 
-router = APIRouter(prefix="/api", tags=["auth"])
 
-
-class UserInfo(BaseModel):
+class CurrentUser(BaseModel):
     uid: str
     email: str | None = None
     display_name: str | None = None
 
 
-@router.get("/auth/verify", response_model=UserInfo)
-async def verify_token(authorization: str = Header(None)):
+async def get_current_user(authorization: str = Header(None)) -> CurrentUser:
     if not authorization:
         raise HTTPException(status_code=401, detail="Missing authorization header")
 
@@ -23,7 +20,7 @@ async def verify_token(authorization: str = Header(None)):
 
     try:
         decoded = auth.verify_id_token(token)
-        return UserInfo(
+        return CurrentUser(
             uid=decoded["uid"],
             email=decoded.get("email"),
             display_name=decoded.get("name"),

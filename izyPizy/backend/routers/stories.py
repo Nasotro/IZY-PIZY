@@ -4,6 +4,7 @@ from aiosqlite import Connection
 import config
 from database import get_db
 from models.stories import StoryCreate, StoryOut
+from dependencies import CurrentUser, get_current_user
 
 router = APIRouter()
 
@@ -47,16 +48,19 @@ def _row_to_story(row) -> StoryOut:
 async def get_stories(
     position: int | None = Query(default=None),
     db: Connection = Depends(get_db),
+    current_user: CurrentUser = Depends(get_current_user),
 ):
+    user_id = current_user.uid
     if position is not None:
         async with db.execute(
-            "SELECT * FROM stories WHERE position = ? ORDER BY id",
-            (position,),
+            "SELECT * FROM stories WHERE user_id = ? AND position = ? ORDER BY id",
+            (user_id, position),
         ) as cursor:
             rows = await cursor.fetchall()
     else:
         async with db.execute(
-            "SELECT * FROM stories ORDER BY position, id"
+            "SELECT * FROM stories WHERE user_id = ? ORDER BY position, id",
+            (user_id,),
         ) as cursor:
             rows = await cursor.fetchall()
     return [_row_to_story(r) for r in rows]
@@ -79,11 +83,17 @@ async def _ensure_word_exists(db: Connection, number: str, word: str) -> None:
 
 
 @router.post("/stories", response_model=StoryOut, status_code=201)
-async def create_story(body: StoryCreate, db: Connection = Depends(get_db)):
+async def create_story(
+    body: StoryCreate,
+    db: Connection = Depends(get_db),
+    current_user: CurrentUser = Depends(get_current_user),
+):
+    user_id = current_user.uid
     position = body.position
     if position is None:
         async with db.execute(
-            "SELECT COALESCE(MAX(position), -1) + 1 AS next_position FROM stories"
+            "SELECT COALESCE(MAX(position), -1) + 1 AS next_position FROM stories WHERE user_id = ?",
+            (user_id,),
         ) as cursor:
             row = await cursor.fetchone()
             position = row["next_position"]
@@ -97,21 +107,31 @@ async def create_story(body: StoryCreate, db: Connection = Depends(get_db)):
 
     async with db.execute(
         """
-        INSERT INTO stories (position, sentence, word_0, word_1, word_2, word_3, word_4)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO stories (user_id, position, sentence, word_0, word_1, word_2, word_3, word_4)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         """,
-        (position, body.sentence, body.word_0, body.word_1, body.word_2, body.word_3, body.word_4),
+        (user_id, position, body.sentence, body.word_0, body.word_1, body.word_2, body.word_3, body.word_4),
     ) as cursor:
         new_id = cursor.lastrowid
     await db.commit()
-    async with db.execute("SELECT * FROM stories WHERE id = ?", (new_id,)) as cursor:
+    async with db.execute(
+        "SELECT * FROM stories WHERE id = ?", (new_id,)
+    ) as cursor:
         row = await cursor.fetchone()
     return _row_to_story(row)
 
 
 @router.put("/stories/{story_id}", response_model=StoryOut)
-async def update_story(story_id: int, body: StoryCreate, db: Connection = Depends(get_db)):
-    async with db.execute("SELECT id FROM stories WHERE id = ?", (story_id,)) as cursor:
+async def update_story(
+    story_id: int,
+    body: StoryCreate,
+    db: Connection = Depends(get_db),
+    current_user: CurrentUser = Depends(get_current_user),
+):
+    user_id = current_user.uid
+    async with db.execute(
+        "SELECT id FROM stories WHERE id = ? AND user_id = ?", (story_id, user_id)
+    ) as cursor:
         if await cursor.fetchone() is None:
             raise HTTPException(status_code=404, detail="Story not found")
 
@@ -119,9 +139,9 @@ async def update_story(story_id: int, body: StoryCreate, db: Connection = Depend
         """
         UPDATE stories
         SET position = ?, sentence = ?, word_0 = ?, word_1 = ?, word_2 = ?, word_3 = ?, word_4 = ?
-        WHERE id = ?
+        WHERE id = ? AND user_id = ?
         """,
-        (body.position, body.sentence, body.word_0, body.word_1, body.word_2, body.word_3, body.word_4, story_id),
+        (body.position, body.sentence, body.word_0, body.word_1, body.word_2, body.word_3, body.word_4, story_id, user_id),
     )
     await db.commit()
     async with db.execute("SELECT * FROM stories WHERE id = ?", (story_id,)) as cursor:
@@ -130,10 +150,17 @@ async def update_story(story_id: int, body: StoryCreate, db: Connection = Depend
 
 
 @router.delete("/stories/{story_id}")
-async def delete_story(story_id: int, db: Connection = Depends(get_db)):
-    async with db.execute("SELECT id FROM stories WHERE id = ?", (story_id,)) as cursor:
+async def delete_story(
+    story_id: int,
+    db: Connection = Depends(get_db),
+    current_user: CurrentUser = Depends(get_current_user),
+):
+    user_id = current_user.uid
+    async with db.execute(
+        "SELECT id FROM stories WHERE id = ? AND user_id = ?", (story_id, user_id)
+    ) as cursor:
         if await cursor.fetchone() is None:
             raise HTTPException(status_code=404, detail="Story not found")
-    await db.execute("DELETE FROM stories WHERE id = ?", (story_id,))
+    await db.execute("DELETE FROM stories WHERE id = ? AND user_id = ?", (story_id, user_id))
     await db.commit()
     return {"ok": True}

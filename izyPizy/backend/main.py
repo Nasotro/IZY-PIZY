@@ -1,10 +1,16 @@
+import os
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from firebase_admin import credentials, initialize_app
 
 from database import init_db
 from routers import pi, dictionary, stories, training, auth
+
+cred_path = os.path.join(os.path.dirname(__file__), "firebase-creds.json")
+cred = credentials.Certificate(cred_path)
+initialize_app(cred)
 
 
 @asynccontextmanager
