@@ -3,10 +3,10 @@ services:
     build:
       context: .
       dockerfile: izyPizy/Dockerfile.backend
-    ports:
-      - "8000:8000"
+    expose:
+      - "8000"
     volumes:
-      - ./izyPizy/data:/app/data
+      - app-data:/app/data
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health')"]
       interval: 30s
@@ -18,7 +18,7 @@ services:
       context: .
       dockerfile: izyPizy/Dockerfile.frontend
     ports:
-      - "5173:80"
+      - "5173:8080"
     depends_on:
       - backend
 

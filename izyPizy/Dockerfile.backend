@@ -8,6 +8,12 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY izyPizy/backend/ .
 
 RUN mkdir -p /app/data
+COPY izyPizy/data/pi.txt /app/data/pi.txt
+
+RUN addgroup --system app && adduser --system --ingroup app app \
+    && chown -R app:app /app
+
+USER app
 
 ENV DATABASE_URL=/app/data/izypizy.db
 ENV PI_FILE=/app/data/pi.txt
