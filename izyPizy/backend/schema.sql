@@ -20,5 +20,6 @@ CREATE TABLE IF NOT EXISTS stories (
     word_2   TEXT NOT NULL,
     word_3   TEXT NOT NULL,
     word_4   TEXT NOT NULL,
+    image_path TEXT,
     UNIQUE(user_id, position)
 );

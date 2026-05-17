@@ -73,6 +73,18 @@ export const updateStory = (storyId, data) =>
 export const deleteStory = (storyId) =>
   apiFetch(`/stories/${storyId}`, { method: 'DELETE' });
 
+// NEW: Generate image for a story
+export const generateStoryImage = (storyId) =>
+  apiFetch(`/stories/${storyId}/generate-image`, {
+    method: 'POST',
+  });
+
+// NEW: Get image URL for display
+export const getImageUrl = (imagePath) => {
+  if (!imagePath) return null;
+  return `/api/images/${imagePath}`;
+};
+
 // Training
 export const verifyDigit = (position, digit) =>
   apiFetch('/train/verify', {

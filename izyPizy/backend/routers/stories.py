@@ -1,5 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from aiosqlite import Connection
+import httpx
+import uuid
+from pathlib import Path
 
 import config
 from database import get_db
@@ -41,7 +44,14 @@ def _row_to_story(row) -> StoryOut:
         word_2=row["word_2"],
         word_3=row["word_3"],
         word_4=row["word_4"],
+        image_path=row["image_path"],
     )
+
+
+async def _ensure_image_dir() -> Path:
+    """Ensure the image storage directory exists."""
+    config.IMAGE_STORAGE_DIR.mkdir(parents=True, exist_ok=True)
+    return config.IMAGE_STORAGE_DIR
 
 
 @router.get("/stories", response_model=list[StoryOut])
@@ -107,10 +117,10 @@ async def create_story(
 
     async with db.execute(
         """
-        INSERT INTO stories (user_id, position, sentence, word_0, word_1, word_2, word_3, word_4)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO stories (user_id, position, sentence, word_0, word_1, word_2, word_3, word_4, image_path)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
-        (user_id, position, body.sentence, body.word_0, body.word_1, body.word_2, body.word_3, body.word_4),
+        (user_id, position, body.sentence, body.word_0, body.word_1, body.word_2, body.word_3, body.word_4, None),
     ) as cursor:
         new_id = cursor.lastrowid
     await db.commit()
@@ -149,6 +159,71 @@ async def update_story(
     return _row_to_story(row)
 
 
+@router.post("/stories/{story_id}/generate-image", response_model=StoryOut)
+async def generate_story_image(
+    story_id: int,
+    db: Connection = Depends(get_db),
+    current_user: CurrentUser = Depends(get_current_user),
+):
+    """Generate an image for a story using Google GenAI, save and store it locally."""
+    from models.stories import generate_image_from_prompt
+    
+    user_id = current_user.uid
+    
+    # Get the story
+    async with db.execute(
+        "SELECT * FROM stories WHERE id = ? AND user_id = ?", (story_id, user_id)
+    ) as cursor:
+        row = await cursor.fetchone()
+        if row is None:
+            raise HTTPException(status_code=404, detail="Story not found")
+    
+    story = _row_to_story(row)
+    
+    # Check if story has a sentence to use as prompt
+    if not story.sentence:
+        raise HTTPException(
+            status_code=400,
+            detail="Story has no sentence to generate image from"
+        )
+    
+    # Check if Google API key is configured
+    if not config.GOOGLE_API_KEY:
+        raise HTTPException(
+            status_code=500,
+            detail="Google API key not configured"
+        )
+    
+    try:
+        # Step 1: Generate image using Google GenAI
+        image_dir = await _ensure_image_dir()
+        image_filename = f"story_{story_id}_{uuid.uuid4().hex}.png"
+        image_path = image_dir / image_filename
+        
+        await generate_image_from_prompt(story.sentence, str(image_path))
+        
+        # Step 2: Store relative path in database
+        relative_path = f"images/{image_filename}"
+        await db.execute(
+            "UPDATE stories SET image_path = ? WHERE id = ? AND user_id = ?",
+            (relative_path, story_id, user_id),
+        )
+        await db.commit()
+        
+        # Step 3: Return updated story
+        async with db.execute(
+            "SELECT * FROM stories WHERE id = ?", (story_id,)
+        ) as cursor:
+            row = await cursor.fetchone()
+        return _row_to_story(row)
+        
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to generate image: {str(e)}"
+        )
+
+
 @router.delete("/stories/{story_id}")
 async def delete_story(
     story_id: int,
@@ -156,11 +231,26 @@ async def delete_story(
     current_user: CurrentUser = Depends(get_current_user),
 ):
     user_id = current_user.uid
+    
+    # Get image path before deleting
+    image_path = None
     async with db.execute(
-        "SELECT id FROM stories WHERE id = ? AND user_id = ?", (story_id, user_id)
+        "SELECT image_path FROM stories WHERE id = ? AND user_id = ?", (story_id, user_id)
     ) as cursor:
-        if await cursor.fetchone() is None:
+        row = await cursor.fetchone()
+        if row is None:
             raise HTTPException(status_code=404, detail="Story not found")
+        image_path = row["image_path"]
+    
+    # Delete from database
     await db.execute("DELETE FROM stories WHERE id = ? AND user_id = ?", (story_id, user_id))
     await db.commit()
+    
+    # Delete image file if it exists
+    if image_path:
+        try:
+            (config.IMAGE_STORAGE_DIR / image_path).unlink(missing_ok=True)
+        except Exception:
+            pass  # Best effort cleanup
+    
     return {"ok": True}

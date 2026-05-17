@@ -156,10 +156,6 @@
 </script>
 
 <div class="rounded-2xl border border-[#C75B39]/20 bg-theme-surface p-5 shadow-sm">
-  <h2 class="text-lg font-bold text-theme mb-4">
-    {isEdit ? 'Edit Story' : 'Add Story'}
-  </h2>
-
   <form on:submit|preventDefault={handleSubmit} class="space-y-4">
     <!-- Pi digit preview -->
     <div class="rounded-lg bg-theme-surface-alt border border-theme-muted/10 px-4 py-3 md:px-5 md:py-4">
