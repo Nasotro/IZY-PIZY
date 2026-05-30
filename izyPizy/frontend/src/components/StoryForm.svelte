@@ -36,7 +36,7 @@
   let step = isEdit ? 2 : 1;
 
   // Extract words from sentence for selection
-  $: words = sentence.trim() === '' ? [] : sentence.split(/\s+/);
+  $: words = sentence.trim() === '' ? [] : sentence.split(/\s+/).map(w => w.replace(/^[^\w]+/, '').replace(/[^\w]+$/, ''));
   
   // If editing and we have words, pre-select the 5 words from the story
   $: if (isEdit && step === 2 && words.length > 0 && selectedIndices.length === 0) {

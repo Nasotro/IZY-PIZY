@@ -23,9 +23,10 @@
   async function handleAdd() {
     const trimmed = newWord.trim();
     if (!trimmed || adding) return;
+    const cleaned = trimmed.replace(/^[^\w]+/, '').replace(/[^\w]+$/, '');
     adding = true;
     try {
-      await addWord(number, trimmed);
+      await addWord(number, cleaned);
       newWord = '';
       error = '';
       await onUpdate(number);
@@ -58,8 +59,9 @@
   async function handleSaveEdit(id) {
     const trimmed = editingValue.trim();
     if (!trimmed) return;
+    const cleaned = trimmed.replace(/^[^\w]+/, '').replace(/[^\w]+$/, '');
     try {
-      await updateWord(id, trimmed);
+      await updateWord(id, cleaned);
       editingId = null;
       editingValue = '';
       error = '';
