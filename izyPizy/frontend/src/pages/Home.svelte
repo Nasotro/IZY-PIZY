@@ -18,6 +18,12 @@
       title: 'Book',
       description: 'Read stories encoded in Pi digits',
     },
+    {
+      to: '/pi-visualizer',
+      icon: '🥧',
+      title: 'Pi Visualizer',
+      description: 'Visualize Pi digits in responsive groups',
+    },
   ];
 </script>
 

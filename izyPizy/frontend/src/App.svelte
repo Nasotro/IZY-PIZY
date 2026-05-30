@@ -4,6 +4,7 @@
   import Training from './pages/Training.svelte';
   import Dictionary from './pages/Dictionary.svelte';
   import Book from './pages/Book.svelte';
+  import PiVisualizer from './pages/PiVisualizer.svelte';
   import Login from './pages/Login.svelte';
   import Unauthorized from './pages/Unauthorized.svelte';
   import { onMount } from 'svelte';
@@ -27,7 +28,7 @@
     let hash = window.location.hash.slice(1) || '/';
     if (hash === '' || hash === '/') return '/';
     
-    if (hash === '/training' || hash === '/dictionary' || hash === '/book') {
+    if (hash === '/training' || hash === '/dictionary' || hash === '/book' || hash === '/pi-visualizer') {
       if (!$user) {
         savedTarget = hash;
         return '/unauthorized';
@@ -100,6 +101,8 @@
     <Dictionary />
   {:else if currentRoute === '/book'}
     <Book />
+  {:else if currentRoute === '/pi-visualizer'}
+    <PiVisualizer />
   {:else if currentRoute === '/login'}
     <Login />
   {:else if currentRoute === '/unauthorized'}
