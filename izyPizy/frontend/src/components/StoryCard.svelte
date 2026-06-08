@@ -101,7 +101,7 @@
           {#if canGenerateImage && !imageSrc}
             <button 
               on:click={onGenerateImage} 
-              disabled={true}
+              disabled={generatingImage}
               class="min-h-[40px] md:min-h-[44px] px-4 md:px-5 text-sm md:text-base font-medium rounded-lg border hover:bg-theme-accent/5 transition-colors disabled:opacity-50"
               style="color: var(--color-accent); border-color: var(--color-accent);"
             >
@@ -123,7 +123,7 @@
     {#if canGenerateImage && !imageSrc}
       <button 
         on:click={onGenerateImage} 
-        disabled={true}
+        disabled={generatingImage}
         class="min-h-[40px] md:min-h-[44px] px-4 md:px-5 text-sm md:text-base font-medium rounded-lg border hover:bg-theme-accent/5 transition-colors disabled:opacity-50"
         style="color: var(--color-accent); border-color: var(--color-accent);"
       >

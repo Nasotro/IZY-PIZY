@@ -4,5 +4,6 @@ aiosqlite
 python-dotenv
 firebase-admin
 httpx
-google-genai
+runware
+aiohttp
 pillow

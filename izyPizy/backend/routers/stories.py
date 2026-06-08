@@ -165,7 +165,7 @@ async def generate_story_image(
     db: Connection = Depends(get_db),
     current_user: CurrentUser = Depends(get_current_user),
 ):
-    """Generate an image for a story using Google GenAI, save and store it locally."""
+    """Generate an image for a story using Runware, save and store it locally."""
     from models.stories import generate_image_from_prompt
     
     user_id = current_user.uid
@@ -187,15 +187,15 @@ async def generate_story_image(
             detail="Story has no sentence to generate image from"
         )
     
-    # Check if Google API key is configured
-    if not config.GOOGLE_API_KEY:
+    # Check if Runware API key is configured
+    if not config.RUNWARE_API_KEY:
         raise HTTPException(
             status_code=500,
-            detail="Google API key not configured"
+            detail="Runware API key not configured"
         )
     
     try:
-        # Step 1: Generate image using Google GenAI
+        # Step 1: Generate image using Runware
         image_dir = await _ensure_image_dir()
         image_filename = f"story_{story_id}_{uuid.uuid4().hex}.png"
         image_path = image_dir / image_filename
@@ -203,7 +203,7 @@ async def generate_story_image(
         await generate_image_from_prompt(story.sentence, str(image_path))
         
         # Step 2: Store relative path in database
-        relative_path = f"images/{image_filename}"
+        relative_path = image_filename
         await db.execute(
             "UPDATE stories SET image_path = ? WHERE id = ? AND user_id = ?",
             (relative_path, story_id, user_id),
