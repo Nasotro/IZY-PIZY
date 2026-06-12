@@ -1,8 +1,8 @@
 from pydantic import BaseModel
 
-# Image generation is now handled by the dedicated image_generation module
+# Image generation is now handled by the dedicated blackforest_image_generation module
 # Import here for backward compatibility
-from models.image_generation import generate_image_from_prompt
+from models.blackforest_image_generation import generate_image_from_prompt
 
 class StoryCreate(BaseModel):
     position: int | None = None
