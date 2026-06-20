@@ -164,7 +164,9 @@
         (digits {position * 10 + 1}–{position * 10 + 10}):
       </p>
       {#if previewLoading}
-        <Loader size="sm" />
+        <div class="flex justify-center">
+          <Loader size="sm" />
+        </div>
       {:else}
         <div class="grid grid-cols-5 gap-1 md:gap-2 text-center">
           {#each pairs as pair, i}

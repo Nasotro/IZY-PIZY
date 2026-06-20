@@ -37,7 +37,8 @@ class ImageGenerator:
         width: int = 1024,
         height: int = 1024,
         model: str = "runware:101@1",
-        use_mistral_enhancement: bool = True
+        use_mistral_enhancement: bool = True,
+        key_elements: list[str] | None = None
     ) -> str:
         """
         Generate an image from a text prompt and save it to the specified path.
@@ -49,6 +50,7 @@ class ImageGenerator:
             height: Height of the generated image in pixels
             model: Runware model identifier
             use_mistral_enhancement: Whether to enhance the prompt using Mistral LLM
+            key_elements: List of 3-5 important words/objects that MUST appear prominently
             
         Returns:
             The output path where the image was saved
@@ -58,7 +60,7 @@ class ImageGenerator:
         """
         # Optionally enhance the prompt using Mistral
         if use_mistral_enhancement:
-            enhanced_prompt = await self.enhance_prompt_with_mistral(prompt)
+            enhanced_prompt = await self.enhance_prompt_with_mistral(prompt, key_elements)
         else:
             enhanced_prompt = prompt
         
@@ -98,7 +100,10 @@ class ImageGenerator:
                 Path(output_path).write_bytes(content)
 
     @staticmethod
-    async def enhance_prompt_with_mistral(story_sentence: str) -> str:
+    async def enhance_prompt_with_mistral(
+        story_sentence: str,
+        key_elements: list[str] | None = None
+    ) -> str:
         """
         Enhance a story sentence into a detailed, descriptive prompt using Mistral LLM.
         
@@ -107,6 +112,8 @@ class ImageGenerator:
         
         Args:
             story_sentence: The original story sentence from the user
+            key_elements: List of 3-5 important words/objects that MUST appear prominently.
+                          If provided, these will be explicitly emphasized in the enhanced prompt.
             
         Returns:
             An enhanced prompt optimized for image generation
@@ -117,23 +124,34 @@ class ImageGenerator:
                      on a red tiled roof at sunset, warm golden light, detailed fur 
                      texture, cinematic composition, digital art style"
         """
+        # Build system prompt with key elements if provided
+        if key_elements and len(key_elements) > 0:
+            key_elements_str = ", ".join(key_elements).upper()
+            key_clause = f"IMPORTANT: These key elements MUST all be clearly visible and prominent: {key_elements_str}"
+        else:
+            key_clause = ""
+
         # System prompt for Mistral to enhance the story
-        system_prompt = """You are an expert in transforming short story sentences into highly detailed, 
+        system_prompt = f"""You are an expert in transforming short story sentences into highly detailed, 
 vivid descriptions for AI image generation. Your goal is to expand a simple sentence 
 into a rich, comprehensive prompt that will help an AI image generator create the 
 best possible illustration.
 
+{key_clause}
+
 Guidelines:
-1. Preserve the core meaning and main elements of the original sentence
-2. Add sensory details: colors, textures, lighting, atmosphere
-3. Include style suggestions (digital art, watercolor, cinematic, etc.)
-4. Add composition and perspective details
-5. Include mood and emotional tone
-6. Keep it under 200 words
-7. Always respond in English, even if the input is in another language
-8. Use descriptive, evocative language
-9. Add visual details that make the scene more interesting
-10. Avoid negative prompts (what NOT to include)
+1. Preserve the core meaning and ALL main elements of the original sentence
+2. Explicitly describe each key element with rich visual details
+3. Ensure all key elements are clearly visible and positioned prominently in the composition
+4. Add sensory details: colors, textures, lighting, atmosphere
+5. Include style suggestions (digital art, watercolor, cinematic, etc.)
+6. Add composition and perspective details
+7. Include mood and emotional tone
+8. Keep it under 200 words
+9. Always respond in English, even if the input is in another language
+10. Use descriptive, evocative language
+11. Add visual details that make the scene more interesting
+12. Avoid negative prompts (what NOT to include)
 
 Return only the enhanced prompt, nothing else."""
 
@@ -217,7 +235,8 @@ async def generate_image_from_prompt(
     width: int = 1024,
     height: int = 1024,
     model: str = "runware:101@1",
-    use_mistral_enhancement: bool = True
+    use_mistral_enhancement: bool = True,
+    key_elements: list[str] | None = None
 ) -> str:
     """
     Generate an image from a text prompt using Runware.
@@ -231,6 +250,7 @@ async def generate_image_from_prompt(
         height: Height of the generated image in pixels
         model: Runware model identifier
         use_mistral_enhancement: Whether to enhance the prompt using Mistral LLM (default: True)
+        key_elements: List of 3-5 important words/objects that MUST appear prominently
         
     Returns:
         The output path where the image was saved
@@ -242,5 +262,6 @@ async def generate_image_from_prompt(
         width, 
         height, 
         model,
-        use_mistral_enhancement
+        use_mistral_enhancement,
+        key_elements
     )

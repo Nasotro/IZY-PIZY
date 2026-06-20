@@ -169,6 +169,13 @@ The system maintains backward compatibility:
 5. **Module Import Errors**
    - Ensure all dependencies are installed: `pip install -r requirements.txt`
 
+6. **404 Not Found / Model Endpoint Errors**
+   - This usually means the specified model endpoint doesn't exist or has been deprecated
+   - The code now has **automatic fallback** to try multiple working models
+   - Supported models include: `flux-2-pro`, `flux-2-pro-preview`, `flux-2-max`, `flux-2-flex`, `flux-2-klein-4b`, `flux-2-klein-9b-preview`, `flux-pro-1.1`, `flux-pro-1.1-ultra`, `flux-pro`, `flux`
+   - The code will automatically try the next working model if one fails
+   - You can also specify a model explicitly in your API call
+
 ## Files Modified/Created
 
 ### Modified

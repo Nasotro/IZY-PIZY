@@ -1,0 +1,36 @@
+**Training**
+- Spaced repetition reminders - prompt users at optimal intervals to review weak positions
+- Achievement badges (100 digits, 500 digits, marathon modes)
+- Daily challenges with timed goals
+- Speedrun mode - beat your best time to reach position X
+- Audio/haptic feedback on correct/wrong answers
+- Support for other constants (e, √2, φ)
+
+**Dictionary**
+- Import/export dictionary (JSON/CSV)
+- Word of the day notification
+- Random review quiz mode
+- Pronunciation guides for words
+
+**Book**
+- User-generated stories marketplace
+- Story creator tool
+- Export stories as PDF
+
+**UI/UX**
+- Dark/light theme toggle
+- Custom color themes
+- Sound effects toggle
+- PWA support for installable mobile app
+- Animated transitions
+
+**Social & Gamification**
+- User accounts with cloud sync
+- Global/local leaderboards
+- Share progress cards (images for social media)
+- Friend challenges
+
+**Data**
+- Backup/restore to file
+- Progress analytics (accuracy over time)
+- Session history view

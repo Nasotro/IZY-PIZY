@@ -8,6 +8,7 @@ from firebase_admin import credentials, initialize_app
 
 from database import init_db
 from routers import pi, dictionary, stories, training, auth, images
+import config
 
 # Load Firebase credentials from environment variable
 cred_json = os.getenv("FIREBASE_CREDENTIALS_JSON")

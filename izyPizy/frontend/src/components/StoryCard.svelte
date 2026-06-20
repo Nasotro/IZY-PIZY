@@ -1,13 +1,13 @@
 <script>
-  import { getImageUrl } from '../lib/api.js';
-  
   export let story;
   export let piDigits = '';
   export let showFull = true;
   export let onEdit = () => {};
   export let onDelete = () => {};
   export let onGenerateImage = () => {};
+  export let onOpenImageGeneration = () => {};
   export let generatingImage = false;
+  export let hasImageGenerationModal = false;
 
   $: words = [story.word_0, story.word_1, story.word_2, story.word_3, story.word_4];
   $: pairs = piDigits
@@ -19,7 +19,7 @@
 
   $: highlightedSentence = getHighlightedSentence(story.sentence, words);
   
-  $: imageSrc = story.image_path ? getImageUrl(story.image_path) : null;
+  $: imageSrc = story.image_url;
   $: canGenerateImage = !!story.sentence;
 
   function getHighlightedSentence(sentence, wordList) {
@@ -99,14 +99,25 @@
       <div class="flex justify-end">
         <div class="flex gap-2">
           {#if canGenerateImage && !imageSrc}
-            <button 
-              on:click={onGenerateImage} 
-              disabled={generatingImage}
-              class="min-h-[40px] md:min-h-[44px] px-4 md:px-5 text-sm md:text-base font-medium rounded-lg border hover:bg-theme-accent/5 transition-colors disabled:opacity-50"
-              style="color: var(--color-accent); border-color: var(--color-accent);"
-            >
-              {generatingImage ? 'Generating...' : 'Generate Image'}
-            </button>
+            {#if hasImageGenerationModal}
+              <button 
+                on:click={onOpenImageGeneration} 
+                disabled={generatingImage}
+                class="min-h-[40px] md:min-h-[44px] px-4 md:px-5 text-sm md:text-base font-medium rounded-lg border hover:bg-theme-accent/5 transition-colors disabled:opacity-50"
+                style="color: var(--color-accent); border-color: var(--color-accent);"
+              >
+                {generatingImage ? 'Generating...' : 'Generate Image'}
+              </button>
+            {:else}
+              <button 
+                on:click={onGenerateImage} 
+                disabled={generatingImage}
+                class="min-h-[40px] md:min-h-[44px] px-4 md:px-5 text-sm md:text-base font-medium rounded-lg border hover:bg-theme-accent/5 transition-colors disabled:opacity-50"
+                style="color: var(--color-accent); border-color: var(--color-accent);"
+              >
+                {generatingImage ? 'Generating...' : 'Generate Image'}
+              </button>
+            {/if}
           {:else if imageSrc}
             <span class="min-h-[40px] md:min-h-[44px] px-4 md:px-5 text-sm md:text-base font-medium rounded-lg text-theme-muted/60 bg-theme-surface-alt">
               Image generated
@@ -121,14 +132,25 @@
 
   <div class="flex justify-end gap-2 px-4 pb-3 md:px-6 md:pb-4 lg:hidden">
     {#if canGenerateImage && !imageSrc}
-      <button 
-        on:click={onGenerateImage} 
-        disabled={generatingImage}
-        class="min-h-[40px] md:min-h-[44px] px-4 md:px-5 text-sm md:text-base font-medium rounded-lg border hover:bg-theme-accent/5 transition-colors disabled:opacity-50"
-        style="color: var(--color-accent); border-color: var(--color-accent);"
-      >
-        {generatingImage ? 'Generating...' : 'Generate Image'}
-      </button>
+      {#if hasImageGenerationModal}
+        <button 
+          on:click={onOpenImageGeneration} 
+          disabled={generatingImage}
+          class="min-h-[40px] md:min-h-[44px] px-4 md:px-5 text-sm md:text-base font-medium rounded-lg border hover:bg-theme-accent/5 transition-colors disabled:opacity-50"
+          style="color: var(--color-accent); border-color: var(--color-accent);"
+        >
+          {generatingImage ? 'Generating...' : 'Generate Image'}
+        </button>
+      {:else}
+        <button 
+          on:click={onGenerateImage} 
+          disabled={generatingImage}
+          class="min-h-[40px] md:min-h-[44px] px-4 md:px-5 text-sm md:text-base font-medium rounded-lg border hover:bg-theme-accent/5 transition-colors disabled:opacity-50"
+          style="color: var(--color-accent); border-color: var(--color-accent);"
+        >
+          {generatingImage ? 'Generating...' : 'Generate Image'}
+        </button>
+      {/if}
     {:else if imageSrc}
       <span class="min-h-[40px] md:min-h-[44px] px-4 md:px-5 text-sm md:text-base font-medium rounded-lg text-theme-muted/60 bg-theme-surface-alt">
         Image generated

@@ -1,8 +1,9 @@
 <script>
   import { onMount } from 'svelte';
-  import { getStories, deleteStory, getPi, generateStoryImage } from '../lib/api.js';
+  import { getStories, deleteStory, getPi, generateStoryImage, generateStoryImageBatch } from '../lib/api.js';
   import StoryCard from '../components/StoryCard.svelte';
   import StoryForm from '../components/StoryForm.svelte';
+  import ImageGenerationModal from '../components/ImageGenerationModal.svelte';
   import Loader from '../components/Loader.svelte';
 
   let stories = [];
@@ -17,6 +18,10 @@
   
   // Track image generation state per story
   let generatingImageFor = {}; // { storyId: boolean }
+  
+  // Image generation modal state
+  let showImageGenerationModal = false;
+  let selectedStoryForGeneration = null;
 
   async function loadStories() {
     loading = true;
@@ -100,6 +105,27 @@
     } finally {
       generatingImageFor = { ...generatingImageFor, [story.id]: false };
     }
+  }
+
+  // Open image generation modal
+  function openImageGenerationModal(story) {
+    selectedStoryForGeneration = story;
+    showImageGenerationModal = true;
+  }
+
+  // Close image generation modal
+  function closeImageGenerationModal() {
+    showImageGenerationModal = false;
+    selectedStoryForGeneration = null;
+  }
+
+  // Handle completion of image generation from modal
+  async function handleImageGenerationComplete(updatedStory) {
+    closeImageGenerationModal();
+    // Update the story in the local list
+    stories = stories.map(s => s.id === updatedStory.id ? updatedStory : s);
+    // Clear the generating state
+    generatingImageFor = { ...generatingImageFor, [updatedStory.id]: false };
   }
 
   function toggleSort() {
@@ -193,9 +219,20 @@
           onEdit={() => openEdit(story)}
           onDelete={() => handleDelete(story)}
           onGenerateImage={() => handleGenerateImage(story)}
+          onOpenImageGeneration={() => openImageGenerationModal(story)}
+          hasImageGenerationModal={true}
           generatingImage={generatingImageFor[story.id] ?? false}
         />
       {/each}
     </div>
+  {/if}
+
+  <!-- Image Generation Modal -->
+  {#if showImageGenerationModal && selectedStoryForGeneration}
+    <ImageGenerationModal
+      story={selectedStoryForGeneration}
+      onClose={closeImageGenerationModal}
+      onComplete={handleImageGenerationComplete}
+    />
   {/if}
 </div>

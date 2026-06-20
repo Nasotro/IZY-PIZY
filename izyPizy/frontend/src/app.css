@@ -36,6 +36,9 @@
   --color-surface-alt: #F5F2EE;
   --color-border: #4A4036;
   --color-border-muted: #4A4036;
+  
+  /* RGB versions for rgba() usage */
+  --color-border-muted-rgb: 74, 64, 54;
 }
 
 [data-theme="dark"] {
@@ -50,6 +53,8 @@
   --color-surface-alt: #2A2522;
   --color-border: #8A7F75;
   --color-border-muted: #4A4036;
+  /* RGB versions for rgba() usage */
+  --color-border-muted-rgb: 74, 64, 54;
 }
 
 a {

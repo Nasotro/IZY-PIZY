@@ -79,6 +79,27 @@ export const generateStoryImage = (storyId) =>
     method: 'POST',
   });
 
+// NEW: Generate multiple images for a story with custom options
+export const generateStoryImageBatch = (storyId, options = {}) =>
+  apiFetch(`/stories/${storyId}/generate-image-batch`, {
+    method: 'POST',
+    body: JSON.stringify(options),
+  });
+
+// NEW: Get enhanced prompt preview
+export const getEnhancedPromptPreview = (prompt, keyElements = null) =>
+  apiFetch('/stories/preview-prompt', {
+    method: 'POST',
+    body: JSON.stringify({ prompt, key_elements: keyElements }),
+  });
+
+// NEW: Set the image for a story (used after batch generation)
+export const setStoryImage = (storyId, imagePath) =>
+  apiFetch(`/stories/${storyId}/set-image`, {
+    method: 'POST',
+    body: JSON.stringify({ image_path: imagePath }),
+  });
+
 // NEW: Get image URL for display
 export const getImageUrl = (imagePath) => {
   if (!imagePath) return null;
