@@ -2,7 +2,7 @@
   import { onMount } from 'svelte';
   import { signOut } from "firebase/auth";
   import { auth } from "../lib/firebase.js";
-  import { user } from "../lib/auth.js";
+  import { user, isLocalUser, logoutLocal } from "../lib/auth.js";
 
   export let isDesktop = false;
 
@@ -28,8 +28,12 @@
   }
 
   async function logout() {
-    await signOut(auth);
-    user.set(null);
+    if (isLocalUser($user)) {
+      logoutLocal();
+    } else {
+      await signOut(auth);
+      user.set(null);
+    }
     window.location.hash = '#/';
   }
 
@@ -72,7 +76,13 @@
   
   <div class="flex items-center gap-3">
     {#if $user}
-      <img src={$user.photoURL} alt="Profile" class="w-8 h-8 rounded-full" />
+      {#if $user.photoURL}
+        <img src={$user.photoURL} alt="Profile" class="w-8 h-8 rounded-full" />
+      {:else}
+        <span class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold" style="background-color: var(--color-accent); color: white;">
+          {($user.displayName || 'U').charAt(0).toUpperCase()}
+        </span>
+      {/if}
       <button
         onclick={logout}
         class="text-sm font-medium px-3 py-2 rounded-lg hover:bg-gray-100"

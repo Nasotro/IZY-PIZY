@@ -9,7 +9,8 @@
   import { onMount } from 'svelte';
   import { onAuthStateChanged } from "firebase/auth";
   import { auth } from "./lib/firebase.js";
-  import { user, loading } from "./lib/auth.js";
+  import { user, loading, getStoredLocalUser } from "./lib/auth.js";
+  import { detectLocalMode } from "./lib/localMode.js";
 
   let currentRoute = '/';
   let isDesktop = false;
@@ -61,33 +62,63 @@
     window.addEventListener('resize', handleResize);
     window.addEventListener('hashchange', handleHashChange);
 
-    const unsubscribe = onAuthStateChanged(auth, (u) => {
-      if (u) {
-        user.set({
-          uid: u.uid,
-          email: u.email,
-          displayName: u.displayName,
-          photoURL: u.photoURL,
-        });
-        if (savedTarget) {
-          const target = savedTarget;
-          savedTarget = '';
-          currentRoute = target;
-          window.location.hash = '#' + target;
+    let unsubscribe = null;
+
+    detectLocalMode().then((localMode) => {
+      if (localMode) {
+        // Local mode: restore the persisted local user, no Firebase involved.
+        const localUser = getStoredLocalUser();
+        if (localUser) {
+          user.set(localUser);
+          if (savedTarget) {
+            const target = savedTarget;
+            savedTarget = '';
+            currentRoute = target;
+            window.location.hash = '#' + target;
+          } else {
+            currentRoute = getRoute();
+          }
         } else {
+          user.set(null);
+          savedTarget = '';
           currentRoute = getRoute();
         }
-      } else {
-        user.set(null);
-        savedTarget = '';
-        currentRoute = getRoute();
+        loading.set(false);
+        authChecked = true;
+        navKey++;
+        return;
       }
-      loading.set(false);
-      authChecked = true;
-      navKey++;
+
+      unsubscribe = onAuthStateChanged(auth, (u) => {
+        if (u) {
+          user.set({
+            uid: u.uid,
+            email: u.email,
+            displayName: u.displayName,
+            photoURL: u.photoURL,
+          });
+          if (savedTarget) {
+            const target = savedTarget;
+            savedTarget = '';
+            currentRoute = target;
+            window.location.hash = '#' + target;
+          } else {
+            currentRoute = getRoute();
+          }
+        } else {
+          user.set(null);
+          savedTarget = '';
+          currentRoute = getRoute();
+        }
+        loading.set(false);
+        authChecked = true;
+        navKey++;
+      });
     });
 
-    return unsubscribe;
+    return () => {
+      if (unsubscribe) unsubscribe();
+    };
   });
 </script>
 

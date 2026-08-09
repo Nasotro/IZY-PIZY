@@ -501,6 +501,81 @@ Enhanced prompt:"""
 _blackforest_generator: Optional[BlackforestImageGenerator] = None
 
 
+async def _generate_local_placeholder(
+    prompt: str,
+    output_path: str,
+    width: int = 1024,
+    height: int = 1024,
+) -> str:
+    """Create a local placeholder image (offline / local mode).
+
+    Uses Pillow to draw the prompt text on a pastel background so the
+    app works end-to-end without any external image-generation API.
+    """
+    from PIL import Image, ImageDraw, ImageFont
+
+    # Deterministic pastel background color from the prompt
+    import hashlib
+
+    digest = hashlib.md5(prompt.encode("utf-8")).digest()
+    bg = tuple(120 + (digest[i] % 100) for i in range(3))
+
+    img = Image.new("RGB", (width, height), bg)
+    draw = ImageDraw.Draw(img)
+
+    try:
+        font = ImageFont.truetype("/System/Library/Fonts/Helvetica.ttc", 32)
+    except OSError:
+        try:
+            font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 32)
+        except OSError:
+            try:
+                font = ImageFont.load_default(size=32)
+            except TypeError:
+                font = ImageFont.load_default()
+
+    try:
+        small_font = ImageFont.truetype("/System/Library/Fonts/Helvetica.ttc", 22)
+    except OSError:
+        try:
+            small_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 22)
+        except OSError:
+            small_font = font
+
+    # "LOCAL MODE" badge at the top
+    badge = "LOCAL MODE - OFFLINE IMAGE"
+    draw.text((24, 24), badge, fill="white", font=small_font)
+
+    # Word-wrap the prompt and center it
+    max_width = width - 80
+    lines: list[str] = []
+    current = ""
+    for word in prompt.split():
+        candidate = f"{current} {word}".strip()
+        if draw.textlength(candidate, font=font) <= max_width:
+            current = candidate
+        else:
+            if current:
+                lines.append(current)
+            current = word
+    if current:
+        lines.append(current)
+
+    line_height = 44
+    block_height = len(lines) * line_height
+    y = (height - block_height) // 2
+    for line in lines:
+        line_width = draw.textlength(line, font=font)
+        x = (width - line_width) // 2
+        draw.text((x, y), line, fill="white", font=font)
+        y += line_height
+
+    Path(output_path).parent.mkdir(parents=True, exist_ok=True)
+    img.save(output_path, "PNG")
+    print(f"[local-mode] Saved placeholder image to {output_path}")
+    return output_path
+
+
 async def get_blackforest_generator(api_key: str, base_url: str = None) -> BlackforestImageGenerator:
     """
     Get or create the global Blackforest image generator instance.
@@ -553,6 +628,9 @@ async def generate_image_from_prompt(
     Returns:
         The output path where the image was saved
     """
+    if config.LOCAL_MODE:
+        return await _generate_local_placeholder(prompt, output_path, width, height)
+
     generator = await get_blackforest_generator(config.BFL_API_KEY)
     return await generator.generate_image(
         prompt,

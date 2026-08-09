@@ -27,5 +27,17 @@ BFL_API_KEY: str = os.getenv("BFL_API_KEY", "")
 BFL_BASE_URL: str = os.getenv("BFL_BASE_URL", "https://api.bfl.ai/v1")
 
 # Use BFL_API_KEY if available, otherwise fall back to RUNWARE_API_KEY for backward compatibility
-if not BFL_API_KEY and not RUNWARE_API_KEY:
-    raise ValueError("BFL_API_KEY or RUNWARE_API_KEY is not configured in environment variables")
+# Local mode: run fully offline without any external API keys.
+# - Auto-enabled when no image-generation API key is configured
+# - Force on/off with LOCAL_MODE=true / LOCAL_MODE=false
+_local_mode_raw = os.getenv("LOCAL_MODE", "").strip().lower()
+LOCAL_MODE: bool = (
+    _local_mode_raw in ("1", "true", "yes", "on") if _local_mode_raw
+    else not (BFL_API_KEY or RUNWARE_API_KEY)
+)
+# Fixed user identity used in local mode (no Firebase auth).
+LOCAL_MODE_UID: str = os.getenv("LOCAL_MODE_UID", "local-dev")
+LOCAL_MODE_DISPLAY_NAME: str = os.getenv("LOCAL_MODE_DISPLAY_NAME", "Local User")
+
+if not BFL_API_KEY and not RUNWARE_API_KEY and not LOCAL_MODE:
+    raise ValueError("BFL_API_KEY or RUNWARE_API_KEY is not configured in environment variables (or set LOCAL_MODE=true for offline use)")

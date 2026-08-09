@@ -1,5 +1,6 @@
 import { getIdToken } from "firebase/auth";
 import { auth } from "./firebase.js";
+import { detectLocalMode, LOCAL_TOKEN } from "./localMode.js";
 
 const BASE = '/api';
 
@@ -8,7 +9,10 @@ export let currentToken = null;
 export async function apiFetch(path, options = {}) {
   const headers = { 'Content-Type': 'application/json', ...options.headers };
   
-  if (auth.currentUser) {
+  if (await detectLocalMode()) {
+    // Local mode: no Firebase, just send the local token.
+    headers['Authorization'] = `Bearer ${LOCAL_TOKEN}`;
+  } else if (auth.currentUser) {
     try {
       const token = await getIdToken(auth.currentUser);
       currentToken = token;

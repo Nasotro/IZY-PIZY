@@ -395,9 +395,8 @@ async def generate_story_image(
 
     
 
-    # Check if Blackforest API key is configured
-
-    if not config.BFL_API_KEY:
+    # Check if Blackforest API key is configured (not required in local mode)
+    if not config.BFL_API_KEY and not config.LOCAL_MODE:
 
         raise HTTPException(
 
@@ -564,7 +563,7 @@ async def generate_story_image_batch(
     story = _row_to_story(row)
     if not story.sentence:
         raise HTTPException(status_code=400, detail="Story has no sentence to generate image from")
-    if not config.BFL_API_KEY:
+    if not config.BFL_API_KEY and not config.LOCAL_MODE:
         raise HTTPException(status_code=500, detail="Blackforest API key not configured")
     if options is None:
         options = {}

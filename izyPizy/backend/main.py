@@ -12,17 +12,23 @@ import config
 
 # Load Firebase credentials from environment variable
 cred_json = os.getenv("FIREBASE_CREDENTIALS_JSON")
+FIREBASE_ENABLED = False
 if cred_json:
     cred = credentials.Certificate(json.loads(cred_json))
+    initialize_app(cred)
+    FIREBASE_ENABLED = True
 else:
     # Fallback for local development (optional)
     cred_path = os.path.join(os.path.dirname(__file__), "firebase-creds.json")
     if os.path.exists(cred_path):
         cred = credentials.Certificate(cred_path)
+        initialize_app(cred)
+        FIREBASE_ENABLED = True
+    elif config.LOCAL_MODE:
+        # Local mode: no Firebase needed; auth is handled locally.
+        print("[local-mode] Firebase not configured; using local auth (offline mode).")
     else:
         raise ValueError("Firebase credentials not found in environment variables or local file.")
-
-initialize_app(cred)
 
 
 @asynccontextmanager
@@ -50,4 +56,4 @@ app.include_router(images.router, prefix="/api")
 
 @app.get("/api/health")
 def health_check():
-    return {"status": "ok"}
+    return {"status": "ok", "local_mode": config.LOCAL_MODE}

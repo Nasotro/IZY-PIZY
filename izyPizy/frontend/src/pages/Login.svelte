@@ -1,9 +1,17 @@
 <script>
+  import { onMount } from 'svelte';
   import { signInWithPopup } from "firebase/auth";
   import { auth, googleProvider } from "../lib/firebase.js";
   import { user } from "../lib/auth.js";
+  import { loginLocal } from "../lib/auth.js";
+  import { detectLocalMode } from "../lib/localMode.js";
 
   let error = "";
+  let localMode = false;
+
+  onMount(() => {
+    detectLocalMode().then((m) => (localMode = m));
+  });
 
   async function loginWithGoogle() {
     error = "";
@@ -18,6 +26,11 @@
     } catch (e) {
       error = e.message;
     }
+  }
+
+  function loginLocally() {
+    loginLocal();
+    window.location.hash = '#/';
   }
 </script>
 
@@ -41,6 +54,25 @@
       </svg>
       <span class="font-medium text-gray-700">Se connecter avec Google</span>
     </button>
+
+    {#if localMode}
+      <div class="flex items-center gap-3 my-6">
+        <div class="flex-1 h-px bg-gray-200"></div>
+        <span class="text-xs text-gray-400">ou</span>
+        <div class="flex-1 h-px bg-gray-200"></div>
+      </div>
+
+      <button
+        on:click={loginLocally}
+        class="w-full flex items-center justify-center gap-3 bg-gray-100 border-2 border-gray-200 rounded-lg px-6 py-3 hover:bg-gray-200 transition-colors"
+      >
+        <span class="text-lg">💻</span>
+        <span class="font-medium text-gray-700">Continuer sans compte (mode local)</span>
+      </button>
+      <p class="mt-3 text-xs text-gray-400">
+        Aucune connexion Internet requise — vos données restent sur cet ordinateur.
+      </p>
+    {/if}
     
     {#if error}
       <p class="mt-4 text-red-500 text-sm">{error}</p>
