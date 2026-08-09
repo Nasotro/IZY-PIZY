@@ -1,6 +1,7 @@
 <script>
   import { onMount } from 'svelte';
-  import { getStories, deleteStory, getPi, generateStoryImage, generateStoryImageBatch } from '../lib/api.js';
+  import { fly } from 'svelte/transition';
+  import { getStories, deleteStory, getPi } from '../lib/api.js';
   import StoryCard from '../components/StoryCard.svelte';
   import StoryForm from '../components/StoryForm.svelte';
   import ImageGenerationModal from '../components/ImageGenerationModal.svelte';
@@ -15,10 +16,13 @@
   let editingStory = null;
   let nextPosition = 0;
   let sortOrder = 'asc';
-  
+
+  // Currently selected 10-digit group (story id)
+  let selectedId = null;
+
   // Track image generation state per story
   let generatingImageFor = {}; // { storyId: boolean }
-  
+
   // Image generation modal state
   let showImageGenerationModal = false;
   let selectedStoryForGeneration = null;
@@ -50,6 +54,27 @@
     piCache = piCache;
   }
 
+  function pairsFor(story) {
+    const digits = piCache.get(story.position) ?? '';
+    return digits
+      ? [0, 1, 2, 3, 4].map((i) => digits.slice(i * 2, i * 2 + 2))
+      : ['??', '??', '??', '??', '??'];
+  }
+
+  $: sortedStories = [...stories].sort((a, b) =>
+    sortOrder === 'asc' ? a.position - b.position : b.position - a.position
+  );
+
+  $: selectedStory = stories.find((s) => s.id === selectedId) ?? null;
+
+  function selectStory(id) {
+    selectedId = id;
+  }
+
+  function closeDrawer() {
+    selectedId = null;
+  }
+
   function openCreate() {
     editingStory = null;
     formMode = 'create';
@@ -76,34 +101,18 @@
   async function handleSave(saved) {
     closeForm();
     await loadStories();
+    // Keep the edited story open, or select the newly created one
+    if (saved && saved.id) selectedId = saved.id;
   }
 
   async function handleDelete(story) {
     if (!confirm(`Delete story at position ${story.position}?`)) return;
     try {
       await deleteStory(story.id);
+      if (selectedId === story.id) selectedId = null;
       await loadStories();
     } catch (e) {
       alert('Failed to delete: ' + e.message);
-    }
-  }
-
-  // Handle image generation
-  async function handleGenerateImage(story) {
-    if (!story.sentence) {
-      alert('Story has no sentence to generate an image from.');
-      return;
-    }
-    
-    generatingImageFor = { ...generatingImageFor, [story.id]: true };
-    try {
-      const updatedStory = await generateStoryImage(story.id);
-      // Update the story in the local list
-      stories = stories.map(s => s.id === story.id ? updatedStory : s);
-    } catch (e) {
-      alert('Failed to generate image: ' + e.message);
-    } finally {
-      generatingImageFor = { ...generatingImageFor, [story.id]: false };
     }
   }
 
@@ -132,10 +141,6 @@
     sortOrder = sortOrder === 'asc' ? 'desc' : 'asc';
   }
 
-  $: sortedStories = [...stories].sort((a, b) => 
-    sortOrder === 'asc' ? a.position - b.position : b.position - a.position
-  );
-
   onMount(loadStories);
 </script>
 
@@ -146,7 +151,7 @@
       {#if stories.length > 1}
         <button
           on:click={toggleSort}
-          class="min-h-[44px] md:min-h-[48px] px-3 md:px-4 text-sm md:text-base font-medium border rounded-lg hover:bg-theme-accent/5 transition-colors flex items-center gap-1"
+          class="min-h-[44px] md:min-h-[48px] px-3 md:px-4 text-sm md:text-base font-medium border rounded-lg hover:bg-theme-surface-alt transition-colors flex items-center gap-1"
           style="color: var(--color-accent); border-color: var(--color-accent);"
           title={sortOrder === 'asc' ? 'Sort descending' : 'Sort ascending'}
         >
@@ -211,20 +216,100 @@
       <p class="text-sm md:text-base mt-1">Click <span class="font-semibold">+ Add Story</span> to create one.</p>
     </div>
   {:else}
-    <div class="space-y-4 md:space-y-6">
-      {#each sortedStories as story (story.id)}
-        <StoryCard
-          {story}
-          piDigits={piCache.get(story.position) ?? ''}
-          onEdit={() => openEdit(story)}
-          onDelete={() => handleDelete(story)}
-          onGenerateImage={() => handleGenerateImage(story)}
-          onOpenImageGeneration={() => openImageGenerationModal(story)}
-          hasImageGenerationModal={true}
-          generatingImage={generatingImageFor[story.id] ?? false}
-        />
-      {/each}
+    <div class="md:grid md:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] md:gap-6 md:items-start">
+      <!-- Left: vertical list of 10-digit groups (scrollable on desktop) -->
+      <div class="space-y-2 pb-4 md:pb-0 md:max-h-[calc(100vh-15rem)] md:overflow-y-auto md:pr-1.5">
+        {#each sortedStories as story (story.id)}
+          <button
+            type="button"
+            on:click={() => selectStory(story.id)}
+            aria-pressed={selectedId === story.id}
+            class="w-full text-left rounded-xl border px-4 py-3 transition-colors {selectedId === story.id ? 'bg-theme-surface-alt shadow-sm' : 'bg-theme-surface hover:bg-theme-surface-alt'}"
+            style="border-color: {selectedId === story.id
+              ? 'var(--color-accent)'
+              : 'color-mix(in srgb, var(--color-muted) 35%, transparent)'};"
+          >
+            <div class="flex items-center justify-between gap-3">
+              <div class="flex flex-wrap gap-1.5">
+                {#each pairsFor(story) as pair}
+                  <span class="font-mono text-sm md:text-base font-bold px-1.5 py-0.5 rounded bg-theme-surface-alt {selectedId === story.id ? 'text-theme-accent' : ''}">{pair}</span>
+                {/each}
+              </div>
+              <span class="text-xs whitespace-nowrap {selectedId === story.id ? 'text-theme-accent' : ''}" style="color: {selectedId === story.id ? 'var(--color-accent)' : 'var(--color-muted)'};">{story.position * 10 + 1} – {story.position * 10 + 10}</span>
+            </div>
+            <div class="mt-1.5 flex items-center gap-2 min-w-0">
+              <span
+                class="shrink-0 w-2 h-2 rounded-full"
+                style="background-color: {story.image_url ? 'var(--color-accent)' : 'var(--color-muted)'}; opacity: {story.image_url ? 1 : 0.35};"
+                title={story.image_url ? 'Image available' : 'No image'}
+              ></span>
+              {#if story.sentence}
+                <p class="truncate text-sm text-theme-muted">{story.sentence}</p>
+              {:else}
+                <p class="truncate text-sm italic text-theme-muted" style="opacity: 0.5;">No sentence</p>
+              {/if}
+            </div>
+          </button>
+        {/each}
+      </div>
+
+      <!-- Right: story + image detail (slides in on selection) -->
+      <div class="hidden md:block md:min-w-0">
+        {#if selectedStory}
+          {#key selectedStory.id}
+            <div in:fly={{ x: 40, duration: 220 }}>
+              <StoryCard
+                story={selectedStory}
+                piDigits={piCache.get(selectedStory.position) ?? ''}
+                onEdit={() => openEdit(selectedStory)}
+                onDelete={() => handleDelete(selectedStory)}
+                onGenerateImage={() => openImageGenerationModal(selectedStory)}
+                onOpenImageGeneration={() => openImageGenerationModal(selectedStory)}
+                hasImageGenerationModal={true}
+                generatingImage={generatingImageFor[selectedStory.id] ?? false}
+              />
+            </div>
+          {/key}
+        {:else}
+          <div class="rounded-2xl border border-theme-muted/10 bg-theme-surface shadow-sm p-10 text-center" style="color: var(--color-muted);">
+            <p class="text-lg md:text-xl font-medium">Select a group of digits</p>
+            <p class="text-sm md:text-base mt-1">Click a 10-digit group on the left to see its story and image.</p>
+          </div>
+        {/if}
+      </div>
     </div>
+
+    <!-- Mobile: detail slides in from the side as a drawer -->
+    {#if selectedStory}
+      <div class="fixed inset-0 z-30 md:hidden" role="dialog" aria-modal="true" aria-label="Story details">
+        <div class="absolute inset-0 bg-black/40" on:click={closeDrawer}></div>
+        <div
+          class="drawer-panel absolute inset-y-0 right-0 w-full max-w-md overflow-y-auto p-4 shadow-2xl"
+          style="background-color: var(--color-dominant);"
+        >
+          <div class="mb-3 flex items-center justify-between">
+            <button
+              on:click={closeDrawer}
+              class="flex items-center gap-1.5 min-h-[40px] px-3 text-sm font-medium rounded-lg border hover:bg-theme-surface-alt transition-colors"
+              style="color: var(--color-secondary); border-color: var(--color-border-muted);"
+            >
+              ← Back
+            </button>
+            <span class="text-sm font-semibold text-theme-muted">Digits {selectedStory.position * 10 + 1} – {selectedStory.position * 10 + 10}</span>
+          </div>
+          <StoryCard
+            story={selectedStory}
+            piDigits={piCache.get(selectedStory.position) ?? ''}
+            onEdit={() => openEdit(selectedStory)}
+            onDelete={() => handleDelete(selectedStory)}
+            onGenerateImage={() => openImageGenerationModal(selectedStory)}
+            onOpenImageGeneration={() => openImageGenerationModal(selectedStory)}
+            hasImageGenerationModal={true}
+            generatingImage={generatingImageFor[selectedStory.id] ?? false}
+          />
+        </div>
+      </div>
+    {/if}
   {/if}
 
   <!-- Image Generation Modal -->
@@ -236,3 +321,18 @@
     />
   {/if}
 </div>
+
+<style>
+  .drawer-panel {
+    animation: drawer-in 0.25s ease-out;
+  }
+
+  @keyframes drawer-in {
+    from {
+      transform: translateX(100%);
+    }
+    to {
+      transform: translateX(0);
+    }
+  }
+</style>
