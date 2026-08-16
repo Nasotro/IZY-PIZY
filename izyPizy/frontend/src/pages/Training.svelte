@@ -235,21 +235,21 @@
 </script>
 
 <div class="w-full mx-auto px-4 py-6 md:py-10 lg:py-12 flex flex-col items-center gap-5 md:gap-8">
-  <h1 class="text-2xl md:text-3xl font-bold text-theme self-start">🧠 Training</h1>
+  <h1 class="text-2xl md:text-3xl font-display self-start" style="color: var(--color-secondary);">🧠 Training</h1>
 
   <div class="w-full text-center">
-    <span class="text-sm md:text-base" style="color: var(--color-muted);">Position</span>
-    <p class="text-5xl md:text-6xl lg:text-7xl font-mono font-bold text-theme-accent leading-none mt-1">
+    <span class="font-mono text-xs md:text-sm tracking-[0.25em] uppercase" style="color: var(--color-muted);">Position</span>
+    <p class="text-5xl md:text-6xl lg:text-7xl font-display leading-none mt-1" style="color: var(--color-accent); text-shadow: 3px 3px 0 var(--color-bg-secondary);">
       {currentPosition}
     </p>
     {#if settings.timerMode}
-      <p class="text-2xl md:text-3xl font-mono font-bold text-theme mt-2">
+      <p class="text-2xl md:text-3xl font-mono font-bold mt-2" style="color: var(--color-secondary);">
         {formatTime(elapsedTime)}
       </p>
     {/if}
   </div>
 
-  <div bind:this={digitsContainer} class="w-full space-y-1 overflow-y-auto max-h-40 md:max-h-48 lg:max-h-56 rounded-xl px-3 py-2 md:px-4 md:py-3" style="background-color: var(--color-surface-alt);">
+  <div bind:this={digitsContainer} class="w-full space-y-1 overflow-y-auto max-h-40 md:max-h-48 lg:max-h-56 rounded-lg px-3 py-2 md:px-4 md:py-3" style="background-color: #1A1A1A; border: 2px solid var(--color-border); box-shadow: 5px 5px 0 0 #F4A261;">
     {#if loadingContext}
       <div class="flex items-center justify-center py-4">
         <Loader size="sm" message="Loading digits..." />
@@ -258,7 +258,7 @@
     {#each digitLines as pairs, lineIdx}
       <div class="flex gap-2 md:gap-3 justify-center font-mono text-lg md:text-xl lg:text-2xl leading-tight">
         {#each pairs as pair}
-          <span class="tracking-widest" style="color: var(--color-muted);">{pair}</span>
+          <span class="tracking-widest" style="color: #FAF3E3; opacity: 0.8;">{pair}</span>
         {/each}
         {#if lineIdx === cursorLineIndex && pairs.length < 5}
           <span class="animate-pulse" style="color: var(--color-accent);">_</span>
@@ -284,14 +284,14 @@
       spellcheck="false"
       disabled={errorStopped}
       aria-label="Enter the next digit of pi"
-      class="w-full h-full rounded-3xl border-4 text-center text-6xl md:text-7xl lg:text-8xl font-mono font-bold outline-none transition-colors duration-150"
+      class="w-full h-full rounded-xl border-4 text-center text-6xl md:text-7xl lg:text-8xl font-mono font-bold outline-none transition-colors duration-150 shadow-retro"
       style="
         {errorStopped
           ? 'border-color: var(--color-muted); background-color: var(--color-surface-alt); color: var(--color-muted);'
           : lastResult === 'correct'
-          ? 'border-color: var(--color-accent); background-color: var(--color-surface); color: var(--color-accent);'
+          ? 'border-color: var(--color-success); background-color: var(--color-surface); color: var(--color-success);'
           : lastResult === 'wrong'
-          ? 'border-color: #ef4444; background-color: var(--color-surface); color: #ef4444;'
+          ? 'border-color: var(--color-danger); background-color: var(--color-surface); color: var(--color-danger); animation: shake 0.35s ease;'
           : 'border-color: var(--color-accent); background-color: var(--color-surface); color: var(--color-secondary);'}
       "
     />
@@ -299,11 +299,11 @@
 
   <div class="h-8 md:h-10 text-center">
     {#if errorStopped}
-      <p class="font-bold text-xl md:text-2xl" style="color: #ef4444;">Game Over!</p>
+      <p class="font-display text-xl md:text-2xl" style="color: var(--color-danger);">GAME OVER!</p>
     {:else if lastResult === 'correct'}
-      <p class="w-full text-center text-lg md:text-xl font-semibold animate-pulse" style="color: var(--color-accent);">✓ Correct!</p>
+      <p class="w-full text-center text-lg md:text-xl font-mono font-bold uppercase tracking-widest animate-pulse" style="color: var(--color-success);">✓ Correct!</p>
     {:else if lastResult === 'wrong'}
-      <p class="w-full text-center text-lg md:text-xl font-semibold" style="color: #ef4444;">
+      <p class="w-full text-center text-lg md:text-xl font-mono font-bold uppercase tracking-widest" style="color: var(--color-danger);">
         ✗ Wrong! Expected: <span class="font-mono">{expectedDigit}</span>
       </p>
     {/if}
@@ -314,8 +314,7 @@
       <p class="text-base md:text-lg">You reached position <span class="font-bold text-theme-accent">{currentPosition}</span></p>
       <button
         on:click={reset}
-        class="min-h-[44px] md:min-h-[48px] px-8 md:px-10 text-base md:text-lg font-semibold rounded-xl transition-colors"
-        style="color: var(--color-dominant); background-color: var(--color-accent);"
+        class="min-h-[44px] md:min-h-[48px] px-8 md:px-10 text-base md:text-lg btn-retro btn-retro-primary"
       >
         🔄 Restart
       </button>
@@ -324,24 +323,21 @@
     <div class="flex gap-3 w-full justify-center flex-wrap">
       <button
         on:click={reset}
-        class="min-h-[44px] md:min-h-[48px] px-6 md:px-8 text-sm md:text-base font-medium border rounded-xl hover:bg-theme-muted/5 transition-colors"
-        style="color: var(--color-secondary); border-color: var(--color-border-muted);"
+        class="min-h-[44px] md:min-h-[48px] px-6 md:px-8 text-sm md:text-base btn-retro btn-retro-secondary"
       >
         Reset
       </button>
       {#if settings.jumpEnabled}
         <button
           on:click={openJump}
-          class="min-h-[44px] md:min-h-[48px] px-6 md:px-8 text-sm md:text-base font-medium border rounded-xl hover:bg-theme-accent/5 transition-colors"
-          style="color: var(--color-accent); border-color: var(--color-accent);"
+          class="min-h-[44px] md:min-h-[48px] px-6 md:px-8 text-sm md:text-base btn-retro btn-retro-mustard"
         >
           Jump to…
         </button>
       {/if}
       <button
         on:click={() => { settingsOpen = !settingsOpen; }}
-        class="min-h-[44px] md:min-h-[48px] px-6 md:px-8 text-sm md:text-base font-medium border rounded-xl hover:bg-theme-muted/5 transition-colors"
-        style="color: var(--color-secondary); border-color: var(--color-border-muted);"
+        class="min-h-[44px] md:min-h-[48px] px-6 md:px-8 text-sm md:text-base btn-retro btn-retro-secondary"
       >
         ⚙️ Settings
       </button>
@@ -349,8 +345,8 @@
   {/if}
 
   {#if jumpOpen}
-    <div class="w-full rounded-2xl border p-5 md:p-6 shadow space-y-3" style="border-color: var(--color-accent); background-color: var(--color-surface-alt);">
-      <label class="block text-sm md:text-base font-medium text-theme" for="jump-input">
+    <div class="w-full rounded-lg border-2 p-5 md:p-6 shadow-retro space-y-3" style="border-color: var(--color-accent); background-color: var(--color-surface);">
+      <label class="block text-sm md:text-base font-mono font-bold uppercase tracking-wider" style="color: var(--color-secondary);" for="jump-input">
         Jump to position (0–999)
       </label>
       <input
@@ -360,21 +356,18 @@
         max="999"
         bind:value={jumpValue}
         on:keydown={(e) => { if (e.key === 'Enter') confirmJump(); if (e.key === 'Escape') cancelJump(); }}
-        class="w-full min-h-[44px] md:min-h-[48px] rounded-lg border px-3 text-sm md:text-base focus:outline-none focus:ring-2 focus:ring-theme-accent/40 bg-theme-surface"
-        style="border-color: var(--color-border-muted); color: var(--color-secondary);"
+        class="w-full min-h-[44px] md:min-h-[48px] input-retro px-3 font-mono text-sm md:text-base"
       />
       <div class="flex gap-3 justify-end">
         <button
           on:click={cancelJump}
-          class="min-h-[44px] md:min-h-[48px] px-4 md:px-5 text-sm md:text-base border rounded-lg hover:bg-theme-muted/5"
-          style="color: var(--color-secondary); border-color: var(--color-border-muted);"
+          class="min-h-[44px] md:min-h-[48px] px-4 md:px-5 text-sm md:text-base btn-retro btn-retro-secondary"
         >
           Cancel
         </button>
         <button
           on:click={confirmJump}
-          class="min-h-[44px] md:min-h-[48px] px-4 md:px-5 text-sm md:text-base font-semibold rounded-lg transition-colors"
-          style="color: var(--color-dominant); background-color: var(--color-accent);"
+          class="min-h-[44px] md:min-h-[48px] px-4 md:px-5 text-sm md:text-base btn-retro btn-retro-primary"
         >
           Go
         </button>
@@ -392,9 +385,9 @@
       aria-modal="true"
       tabindex="-1"
     >
-      <div class="w-full max-w-md rounded-2xl border p-6 md:p-8 shadow-2xl space-y-6" style="border-color: var(--color-border-muted); background-color: var(--color-dominant);">
+      <div class="w-full max-w-md rounded-lg border-retro-thick p-6 md:p-8 shadow-retro-xl space-y-6" style="background-color: var(--color-dominant);">
         <div class="flex items-center justify-between">
-          <h2 class="text-xl md:text-2xl font-bold text-theme">Training Settings</h2>
+          <h2 class="text-xl md:text-2xl font-display" style="color: var(--color-secondary);">Training Settings</h2>
           <button
             on:click={() => settingsOpen = false}
             class="leading-none text-2xl hover:opacity-70"
@@ -410,8 +403,8 @@
               type="checkbox"
               bind:checked={settings.jumpEnabled}
               on:change={saveSettings}
-              class="w-5 h-5 rounded focus:ring-2"
-              style="color: var(--color-accent); background-color: var(--color-surface-alt); border-color: var(--color-border-muted);"
+              class="w-5 h-5"
+              style="accent-color: var(--color-accent);"
             />
             <span class="text-base text-theme">Enable "Jump to" button</span>
           </label>
@@ -421,8 +414,8 @@
               type="checkbox"
               bind:checked={settings.timerMode}
               on:change={saveSettings}
-              class="w-5 h-5 rounded focus:ring-2"
-              style="color: var(--color-accent); background-color: var(--color-surface-alt); border-color: var(--color-border-muted);"
+              class="w-5 h-5"
+              style="accent-color: var(--color-accent);"
             />
             <span class="text-base text-theme">Timer mode (show timer & store results)</span>
           </label>
@@ -432,8 +425,8 @@
               type="checkbox"
               bind:checked={settings.errorMode}
               on:change={saveSettings}
-              class="w-5 h-5 rounded focus:ring-2"
-              style="color: var(--color-accent); background-color: var(--color-surface-alt); border-color: var(--color-border-muted);"
+              class="w-5 h-5"
+              style="accent-color: var(--color-accent);"
             />
             <span class="text-base text-theme">Error mode (reset on wrong answer)</span>
           </label>
@@ -441,8 +434,7 @@
 
         <button
           on:click={() => settingsOpen = false}
-          class="w-full min-h-[44px] md:min-h-[48px] text-base font-semibold rounded-xl transition-colors"
-          style="color: var(--color-dominant); background-color: var(--color-accent);"
+          class="w-full min-h-[44px] md:min-h-[48px] text-base btn-retro btn-retro-primary"
         >
           Done
         </button>
@@ -450,3 +442,13 @@
     </div>
   {/if}
 </div>
+
+<style>
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-8px); }
+    40% { transform: translateX(8px); }
+    60% { transform: translateX(-6px); }
+    80% { transform: translateX(6px); }
+  }
+</style>

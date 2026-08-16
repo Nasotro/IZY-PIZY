@@ -66,20 +66,12 @@
   .bg-pattern {
     position: absolute;
     inset: 0;
-    background: 
-      radial-gradient(circle at 20% 80%, rgba(102, 126, 234, 0.15) 0%, transparent 50%),
-      radial-gradient(circle at 80% 20%, rgba(118, 75, 162, 0.15) 0%, transparent 50%),
-      radial-gradient(circle at 50% 50%, rgba(102, 126, 234, 0.05) 0%, transparent 70%);
-    animation: bgShift 10s ease-in-out infinite;
-  }
-
-  @keyframes bgShift {
-    0%, 100% {
-      opacity: 1;
-    }
-    50% {
-      opacity: 0.7;
-    }
+    background:
+      radial-gradient(circle at 85% 15%, rgba(230, 57, 70, 0.08) 0%, transparent 45%),
+      radial-gradient(circle at 12% 85%, rgba(244, 162, 97, 0.14) 0%, transparent 45%),
+      radial-gradient(var(--color-secondary) 1px, transparent 1px);
+    background-size: auto, auto, 22px 22px;
+    opacity: 0.8;
   }
 
   .content {
@@ -102,57 +94,33 @@
   .lock-icon {
     width: 100px;
     height: 100px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: var(--color-accent);
+    border: 3px solid var(--color-border);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     margin: 0 auto 1.5rem;
-    box-shadow: 
-      0 10px 40px rgba(102, 126, 234, 0.3),
-      0 0 0 0 rgba(102, 126, 234, 0.4);
-    animation: pulse 3s infinite, float 4s ease-in-out infinite;
-  }
-
-  @keyframes pulse {
-    0%, 100% {
-      box-shadow: 
-        0 10px 40px rgba(102, 126, 234, 0.3),
-        0 0 0 0 rgba(102, 126, 234, 0.4);
-    }
-    50% {
-      box-shadow: 
-        0 10px 60px rgba(102, 126, 234, 0.4),
-        0 0 0 15px rgba(102, 126, 234, 0);
-    }
-  }
-
-  @keyframes float {
-    0%, 100% {
-      transform: translateY(0);
-    }
-    50% {
-      transform: translateY(-10px);
-    }
+    box-shadow: 6px 6px 0 0 var(--color-border);
   }
 
   .lock-icon svg {
     width: 48px;
     height: 48px;
-    color: white;
+    color: var(--color-bg-tertiary);
   }
 
   h1 {
+    font-family: var(--font-display);
     font-size: 2.5rem;
-    font-weight: 800;
-    color: #1a1a2e;
+    font-weight: 400;
+    color: var(--color-secondary);
     margin: 0 0 0.75rem;
-    letter-spacing: -0.02em;
   }
 
   .message {
     font-size: 1.25rem;
-    color: #6b7280;
+    color: var(--color-muted);
     margin: 0 0 2.5rem;
     max-width: 400px;
     line-height: 1.6;
@@ -162,29 +130,27 @@
     display: inline-flex;
     align-items: center;
     gap: 0.75rem;
-    padding: 1.125rem 2.5rem;
+    padding: 1rem 2.5rem;
     font-size: 1.0625rem;
-    font-weight: 600;
-    color: white;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border: none;
-    border-radius: 9999px;
+    font-weight: 700;
+    color: var(--color-bg-tertiary);
+    background: var(--color-accent);
+    border: 2px solid var(--color-border);
+    border-radius: 6px;
+    box-shadow: 4px 4px 0 0 var(--color-border);
     cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 
-      0 4px 15px rgba(102, 126, 234, 0.35),
-      0 0 0 0 rgba(102, 126, 234, 0.5);
+    transition: transform 0.12s ease, box-shadow 0.12s ease, background-color 0.15s ease;
   }
 
   .login-btn:hover {
-    transform: translateY(-3px) scale(1.02);
-    box-shadow: 
-      0 12px 35px rgba(102, 126, 234, 0.45),
-      0 0 0 8px rgba(102, 126, 234, 0.1);
+    transform: translate(-1px, -1px);
+    box-shadow: 6px 6px 0 0 var(--color-border);
+    background: var(--color-accent-hover);
   }
 
   .login-btn:active {
-    transform: translateY(-1px) scale(1);
+    transform: translate(1px, 1px);
+    box-shadow: 2px 2px 0 0 var(--color-border);
   }
 
   .login-btn svg {
@@ -212,7 +178,7 @@
     }
 
     .login-btn {
-      padding: 1rem 2rem;
+      padding: 0.9rem 2rem;
       font-size: 1rem;
     }
   }
@@ -223,7 +189,7 @@
   }
 
   .error-message {
-    color: #ef4444;
+    color: var(--color-danger);
     margin-top: 1rem;
     font-size: 0.875rem;
   }

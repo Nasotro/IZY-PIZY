@@ -57,16 +57,19 @@
 
 {#key tick}
 {#if isDesktop}
-<nav style="display: flex; align-items: center; justify-content: space-between; position: fixed; top: 0; left: 0; right: 0; z-index: 50; background-color: var(--color-bg-secondary); border-bottom: 2px solid var(--color-muted); height: 5rem; padding: 0 1.5rem; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+<nav style="display: flex; align-items: center; justify-content: space-between; position: fixed; top: 0; left: 0; right: 0; z-index: 50; background-color: var(--color-bg-secondary); border-bottom: 3px solid var(--color-border); height: 5rem; padding: 0 1.5rem;">
   
-  <a href="#/" class="font-bold text-xl" style="color: var(--color-accent);">IZY PIZY 🥧</a>
+  <a href="#/" class="flex items-center gap-2 font-display text-xl" style="color: var(--color-secondary);">
+    <span class="w-8 h-8 rounded-full flex items-center justify-center font-mono text-lg" style="background-color: var(--color-accent); color: var(--color-bg-tertiary); border: 2px solid var(--color-border); box-shadow: 2px 2px 0 0 var(--color-border);">π</span>
+    IZY PIZY 🥧
+  </a>
   
-  <div class="flex items-center gap-2" style="position: absolute; left: 50%; transform: translateX(-50%);">
+  <div class="flex items-center gap-1" style="position: absolute; left: 50%; transform: translateX(-50%);">
     {#each links as { to, label, icon }}
       <a
         href="#{to}"
         class="flex items-center gap-3 text-lg font-medium px-6 py-3 rounded-lg transition-colors"
-        style="color: {isActive(to) ? 'var(--color-accent)' : 'var(--color-secondary)'}; background-color: {isActive(to) ? 'rgba(199, 91, 57, 0.1)' : 'transparent'};"
+        style="color: {isActive(to) ? 'var(--color-accent)' : 'var(--color-secondary)'}; box-shadow: {isActive(to) ? 'inset 0 -3px 0 var(--color-accent)' : 'none'}; opacity: {isActive(to) ? 1 : 0.75};"
       >
         <span class="text-base">{icon}</span>
         <span>{label}</span>
@@ -77,32 +80,32 @@
   <div class="flex items-center gap-3">
     {#if $user}
       {#if $user.photoURL}
-        <img src={$user.photoURL} alt="Profile" class="w-8 h-8 rounded-full" />
+        <img src={$user.photoURL} alt="Profile" class="w-8 h-8 rounded-full border-2" style="border-color: var(--color-border);" />
       {:else}
-        <span class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold" style="background-color: var(--color-accent); color: white;">
+        <span class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold border-2" style="background-color: var(--color-accent); color: var(--color-bg-tertiary); border-color: var(--color-border); box-shadow: 2px 2px 0 0 var(--color-border);">
           {($user.displayName || 'U').charAt(0).toUpperCase()}
         </span>
       {/if}
       <button
         onclick={logout}
-        class="text-sm font-medium px-3 py-2 rounded-lg hover:bg-gray-100"
-        style="color: var(--color-secondary);"
+        class="text-sm font-medium px-3 py-2 rounded-lg border-2 hover:bg-theme-surface-alt transition-colors"
+        style="color: var(--color-secondary); border-color: var(--color-border);"
       >
         Déconnexion
       </button>
     {:else}
       <a
         href="#/login"
-        class="text-sm font-medium px-4 py-2 rounded-lg"
-        style="background-color: var(--color-accent); color: white;"
+        class="text-sm font-medium px-4 py-2 rounded-lg shadow-retro-sm"
+        style="background-color: var(--color-accent); color: var(--color-bg-tertiary); border: 2px solid var(--color-border);"
       >
         Connexion
       </a>
     {/if}
     <button
       onclick={toggleTheme}
-      class="flex items-center justify-center w-10 h-10 rounded-lg transition-colors"
-      style="color: var(--color-secondary);"
+      class="flex items-center justify-center w-10 h-10 rounded-lg border-2 hover:bg-theme-surface-alt transition-colors"
+      style="color: var(--color-secondary); border-color: var(--color-border);"
       title={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
     >
       <span class="text-xl">{darkMode ? '☀️' : '🌙'}</span>
@@ -110,7 +113,7 @@
   </div>
 </nav>
 {:else}
-<nav style="position: fixed; bottom: 0; left: 0; right: 0; z-index: 50; display: flex; background-color: var(--color-bg-secondary); border-top: 2px solid var(--color-muted); height: 5rem; padding: 0.5rem;">
+<nav style="position: fixed; bottom: 0; left: 0; right: 0; z-index: 50; display: flex; background-color: var(--color-bg-secondary); border-top: 3px solid var(--color-border); height: 5rem; padding: 0.5rem;">
   {#each links as { to, label, icon }}
     <a
       href="#{to}"
@@ -118,7 +121,7 @@
       style="color: {isActive(to) ? 'var(--color-accent)' : 'var(--color-muted)'}"
     >
       <span class="text-4xl leading-none">{icon}</span>
-      <span class="text-sm mt-1">{label}</span>
+      <span class="text-sm mt-1 font-medium">{label}</span>
     </a>
   {/each}
   {#if $user}

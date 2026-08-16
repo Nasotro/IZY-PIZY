@@ -124,7 +124,15 @@
 
 <Nav {isDesktop} />
 
-<main class="min-h-screen w-full" style="background-color: var(--color-dominant); padding-bottom: 5rem; padding-top: {isDesktop ? '5rem' : '0'}">
+<div class="retro-bg" aria-hidden="true">
+  <div class="retro-bg__circles"></div>
+  <div class="retro-bg__circles retro-bg__circles--bottom"></div>
+  <span class="retro-bg__pi">π</span>
+  <span class="retro-bg__digits retro-bg__digits--bottom">3.1415926535 8979323846 2643383279 5028841971 6939937510 5820974944 5923078164 0628620899 8628034825 3421170679</span>
+  <span class="retro-bg__digits retro-bg__digits--side">3.1415926535 8979323846 2643383279 5028841971 6939937510 5820974944 5923078164 0628620899 8628034825 3421170679</span>
+</div>
+
+<main class="relative z-10 min-h-screen w-full" style="padding-bottom: 5rem; padding-top: {isDesktop ? '5rem' : '0'}">
   {#if currentRoute === '/training'}
     <Training />
   {:else if currentRoute === '/dictionary'}

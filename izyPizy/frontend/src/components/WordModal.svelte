@@ -94,14 +94,14 @@
 >
   <!-- Panel: bottom-sheet on mobile, centered modal on desktop -->
   <div
-    class="fixed bottom-0 left-0 right-0 z-50 rounded-t-2xl p-5 pb-24 md:p-6 md:pb-6 shadow-2xl max-h-[80vh] overflow-y-auto
+    class="fixed bottom-0 left-0 right-0 z-50 rounded-t-2xl p-5 pb-24 md:p-6 md:pb-6 border-retro-thick shadow-retro-xl max-h-[80vh] overflow-y-auto
            sm:bottom-auto sm:left-1/2 sm:top-1/2 sm:w-96 md:w-[480px] lg:w-[560px] sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-2xl"
     style="background-color: var(--color-dominant);"
     role="document"
   >
     <!-- Header -->
     <div class="mb-4 md:mb-5 flex items-center justify-between">
-      <span class="text-4xl md:text-5xl lg:text-6xl font-extrabold text-theme-accent">{number}</span>
+      <span class="text-4xl md:text-5xl lg:text-6xl font-mono font-bold text-theme-accent">{number}</span>
       <button
         class="rounded-full p-1 md:p-2 hover:bg-theme-muted/5"
         style="color: var(--color-muted);"
@@ -123,24 +123,21 @@
         {#if editingId === w.id}
           <div class="flex items-center gap-1 md:gap-2">
             <input
-              class="rounded border px-2 py-1 md:px-3 md:py-2 text-sm md:text-base focus:outline-none focus:ring-2 focus:ring-theme-accent/40 bg-theme-surface"
-              style="border-color: var(--color-accent); color: var(--color-secondary);"
+              class="input-retro px-2 py-1 md:px-3 md:py-2 text-sm md:text-base"
               bind:value={editingValue}
               on:keydown={(e) => e.key === 'Enter' && handleSaveEdit(w.id)}
             />
             <button
-              class="rounded px-2 py-1 md:px-3 md:py-2 text-xs md:text-sm hover:opacity-90"
-              style="background-color: var(--color-accent); color: var(--color-dominant);"
+              class="btn-retro btn-retro-primary px-2 py-1 md:px-3 md:py-2 text-xs md:text-sm"
               on:click={() => handleSaveEdit(w.id)}
             >Save</button>
             <button
-              class="rounded px-2 py-1 md:px-3 md:py-2 text-xs md:text-sm hover:bg-theme-muted/10"
-              style="background-color: var(--color-surface-alt); color: var(--color-secondary);"
+              class="btn-retro btn-retro-secondary px-2 py-1 md:px-3 md:py-2 text-xs md:text-sm"
               on:click={() => (editingId = null)}
             >Cancel</button>
           </div>
         {:else}
-          <span class="flex items-center gap-1 rounded-full px-3 py-1 md:px-4 md:py-2 text-sm md:text-base font-medium" style="background-color: var(--color-accent); color: var(--color-secondary);">
+          <span class="flex items-center gap-1 rounded-lg border-2 px-3 py-1 md:px-4 md:py-2 text-sm md:text-base font-medium shadow-retro-sm" style="background-color: var(--color-surface); border-color: var(--color-border); color: var(--color-secondary);">
             <button
               class="hover:text-theme-accent"
               style="color: inherit;"
@@ -175,16 +172,14 @@
         bind:this={inputEl}
         type="text"
         inputmode="text"
-        class="flex-1 rounded-lg border px-3 py-3 text-base focus:outline-none focus:ring-2 focus:ring-theme-accent/40 bg-theme-surface"
-        style="border-color: var(--color-border-muted); color: var(--color-secondary);"
+        class="flex-1 input-retro px-3 py-3 text-base"
         placeholder="New word…"
         bind:value={newWord}
         on:keydown={(e) => e.key === 'Enter' && handleAdd()}
       />
       <button
         type="button"
-        class="rounded-lg px-5 py-3 text-base font-semibold hover:disabled:opacity-40 flex items-center gap-2"
-        style="background-color: var(--color-accent); color: var(--color-dominant);"
+        class="btn-retro btn-retro-primary px-5 py-3 text-base flex items-center gap-2"
         on:click={handleAdd}
         disabled={adding}
       >

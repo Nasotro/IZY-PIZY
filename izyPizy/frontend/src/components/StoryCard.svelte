@@ -57,16 +57,16 @@
   }
 </script>
 
-<div class="rounded-2xl border border-theme-muted/10 bg-theme-surface shadow-sm overflow-hidden max-w-full">
+<div class="rounded-lg border-2 bg-theme-surface shadow-retro overflow-hidden max-w-full" style="border-color: var(--color-border);">
   {#if showFull}
-    <div class="px-4 py-2 md:px-6 border-b border-theme-muted/5">
+    <div class="px-4 py-2 md:px-6 border-b" style="border-color: var(--color-border);">
       <div class="flex flex-wrap items-center justify-between gap-2">
         <div class="flex flex-wrap gap-2">
           {#each pairs as pair}
-            <span class="text-base md:text-lg font-semibold text-theme-accent">{pair}</span>
+            <span class="text-base md:text-lg font-mono font-bold" style="color: var(--color-accent);">{pair}</span>
           {/each}
         </div>
-        <span class="text-sm text-theme-muted/40">{startDigit} - {endDigit}</span>
+        <span class="text-sm font-mono" style="color: var(--color-muted);">{startDigit} - {endDigit}</span>
       </div>
     </div>
   {/if}
@@ -75,22 +75,25 @@
 
     {#if imageSrc}
       <div class="mb-4 flex justify-center">
-        <img 
-          src={imageSrc} 
-          alt="Story illustration"
-          class="max-w-full max-h-48 md:max-h-64 object-contain rounded-lg shadow-md"
-        />
+        <div class="relative inline-block border-2 shadow-retro-sm" style="border-color: var(--color-border); background-color: var(--color-bg-tertiary); padding: 6px;">
+          <span class="absolute -top-2.5 left-6 h-6 w-16 -rotate-6 opacity-85" style="background-color: #F4A261; border: 1px solid var(--color-border);"></span>
+          <img 
+            src={imageSrc} 
+            alt="Story illustration"
+            class="max-w-full max-h-48 md:max-h-64 object-contain"
+          />
+        </div>
       </div>
     {/if}
 
     {#if story.sentence && highlightedSentence}
-      <p class="text-xl md:text-2xl lg:text-3xl text-theme leading-snug">
-        {#each highlightedSentence as part}{#if part.highlight}<span class="group relative inline-block cursor-default"><span class="relative font-semibold text-theme group-hover:scale-105 group-hover:text-theme-accent transition-all duration-200 border-b-2 border-theme-accent/50 group-hover:border-theme-accent">{part.text}</span><span class="absolute -top-7 left-1/2 -translate-x-1/2 px-2 py-1 text-sm font-bold rounded-lg shadow-xl opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-20" style="color: var(--color-dominant); background-color: var(--color-accent);">{pairs[part.wordIndex]}</span></span>{:else}{part.text}{/if}{/each}
+      <p class="text-xl md:text-2xl lg:text-3xl leading-snug" style="color: var(--color-secondary);">
+        {#each highlightedSentence as part}{#if part.highlight}<span class="group relative inline-block cursor-default"><span class="relative font-bold px-1 transition-colors duration-150 group-hover:bg-accentHover" style="background-color: var(--color-accent); color: var(--color-bg-tertiary);">{part.text}</span><span class="absolute -top-7 left-1/2 -translate-x-1/2 px-2 py-1 font-mono text-sm font-bold border-2 shadow-retro-sm opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none whitespace-nowrap z-20" style="color: var(--color-bg-tertiary); background-color: var(--color-secondary); border-color: var(--color-border);">{pairs[part.wordIndex]}</span></span>{:else}{part.text}{/if}{/each}
       </p>
     {:else if story.sentence}
-      <p class="text-xl md:text-2xl lg:text-3xl text-theme italic leading-snug">{story.sentence}</p>
+      <p class="text-xl md:text-2xl lg:text-3xl italic leading-snug" style="color: var(--color-secondary);">{story.sentence}</p>
     {:else}
-      <p class="text-lg md:text-xl text-theme-muted/30 italic">No sentence</p>
+      <p class="text-lg md:text-xl italic" style="color: var(--color-muted); opacity: 0.6;">No sentence</p>
     {/if}
   </div>
 
@@ -103,8 +106,7 @@
               <button 
                 on:click={onOpenImageGeneration} 
                 disabled={generatingImage}
-                class="min-h-[40px] md:min-h-[44px] px-4 md:px-5 text-sm md:text-base font-medium rounded-lg border hover:bg-theme-accent/5 transition-colors disabled:opacity-50"
-                style="color: var(--color-accent); border-color: var(--color-accent);"
+                class="min-h-[40px] md:min-h-[44px] px-4 md:px-5 text-sm md:text-base font-mono font-bold uppercase tracking-wider btn-retro btn-retro-secondary disabled:opacity-50"
               >
                 {generatingImage ? 'Generating...' : 'Generate Image'}
               </button>
@@ -112,19 +114,18 @@
               <button 
                 on:click={onGenerateImage} 
                 disabled={generatingImage}
-                class="min-h-[40px] md:min-h-[44px] px-4 md:px-5 text-sm md:text-base font-medium rounded-lg border hover:bg-theme-accent/5 transition-colors disabled:opacity-50"
-                style="color: var(--color-accent); border-color: var(--color-accent);"
+                class="min-h-[40px] md:min-h-[44px] px-4 md:px-5 text-sm md:text-base font-mono font-bold uppercase tracking-wider btn-retro btn-retro-secondary disabled:opacity-50"
               >
                 {generatingImage ? 'Generating...' : 'Generate Image'}
               </button>
             {/if}
           {:else if imageSrc}
-            <span class="min-h-[40px] md:min-h-[44px] px-4 md:px-5 text-sm md:text-base font-medium rounded-lg text-theme-muted/60 bg-theme-surface-alt">
+            <span class="min-h-[40px] md:min-h-[44px] px-4 md:px-5 text-sm md:text-base font-mono font-bold uppercase tracking-wider rounded-lg border-2 flex items-center" style="color: var(--color-muted); border-color: var(--color-border); background-color: var(--color-surface-alt);">
               Image generated
             </span>
           {/if}
-          <button on:click={onEdit} class="min-h-[40px] md:min-h-[44px] px-4 md:px-5 text-sm md:text-base font-medium border rounded-lg hover:bg-theme-accent/5 transition-colors" style="color: var(--color-accent); border-color: var(--color-accent);">Edit</button>
-          <button on:click={onDelete} class="min-h-[40px] md:min-h-[44px] px-4 md:px-5 text-sm md:text-base font-medium border rounded-lg hover:bg-red-50 transition-colors" style="color: var(--color-accent); border-color: var(--color-border-muted);">Delete</button>
+          <button on:click={onEdit} class="min-h-[40px] md:min-h-[44px] px-4 md:px-5 text-sm md:text-base font-mono font-bold uppercase tracking-wider btn-retro btn-retro-secondary">Edit</button>
+          <button on:click={onDelete} class="min-h-[40px] md:min-h-[44px] px-4 md:px-5 text-sm md:text-base font-mono font-bold uppercase tracking-wider btn-retro btn-retro-secondary">Delete</button>
         </div>
       </div>
     </div>

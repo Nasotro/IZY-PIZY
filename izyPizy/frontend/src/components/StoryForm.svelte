@@ -147,18 +147,18 @@
   // Helper: get class for word button based on selection state
   $: wordClasses = words.map((_, i) => {
     const isSel = selectedIndices.includes(i);
-    const base = 'inline-block mx-0.5 px-2 py-1 rounded text-sm md:text-base transition-all border';
+    const base = 'inline-block mx-0.5 px-2 py-1 rounded text-sm md:text-base transition-all border-2';
     if (isSel) {
-      return `${base} bg-theme-accent/15 border-2 border-theme-accent text-theme-accent font-bold`;
+      return `${base} bg-accent/15 border-accent text-accent font-bold`;
     }
-    return `${base} hover:bg-theme-muted/10 border-transparent`;
+    return `${base} hover:bg-muted/10 border-transparent`;
   });
 </script>
 
-<div class="rounded-2xl border border-[#C75B39]/20 bg-theme-surface p-5 shadow-sm">
+<div class="rounded-lg border-2 bg-theme-surface p-5 shadow-retro" style="border-color: var(--color-border);">
   <form on:submit|preventDefault={handleSubmit} class="space-y-4">
     <!-- Pi digit preview -->
-    <div class="rounded-lg bg-theme-surface-alt border border-theme-muted/10 px-4 py-3 md:px-5 md:py-4">
+    <div class="rounded-lg bg-theme-surface-alt border-2 px-4 py-3 md:px-5 md:py-4" style="border-color: var(--color-border);">
       <p class="text-xs md:text-sm text-theme-muted mb-2">
         Pi digits for position {position}&nbsp;
         (digits {position * 10 + 1}–{position * 10 + 10}):
@@ -170,7 +170,7 @@
       {:else}
         <div class="grid grid-cols-5 gap-1 md:gap-2 text-center">
           {#each pairs as pair, i}
-            <span class="font-mono text-sm md:text-base font-bold text-theme-accent bg-theme-accent/5 rounded px-1 py-0.5">
+            <span class="font-mono text-sm md:text-base font-bold px-1 py-0.5 rounded border-2" style="color: var(--color-accent); border-color: var(--color-border); background-color: var(--color-surface);">
               {pair}
             </span>
           {/each}
@@ -189,8 +189,7 @@
           bind:value={sentence}
           rows="4"
           placeholder="Write your story here with at least 5 words..."
-          class="w-full rounded-lg border border-theme-muted/30 px-3 py-2 text-sm md:text-base bg-theme-surface focus:outline-none focus:ring-2 focus:ring-theme-accent/40 resize-none"
-          style="color: var(--color-secondary);"
+          class="w-full input-retro px-3 py-2 text-sm md:text-base resize-none"
         ></textarea>
         <p class="text-xs text-theme-muted/60 mt-1">
           After writing your story, you'll select 5 words from it on the next step.
@@ -201,16 +200,14 @@
         <button
           type="button"
           on:click={onCancel}
-          class="min-h-[44px] md:min-h-[48px] px-5 md:px-6 text-sm md:text-base font-medium border rounded-lg hover:bg-theme-muted/5 transition-colors"
-          style="color: var(--color-secondary); border-color: var(--color-border-muted);"
+          class="min-h-[44px] md:min-h-[48px] px-5 md:px-6 text-sm md:text-base btn-retro btn-retro-secondary"
         >
           Cancel
         </button>
         <button
           type="button"
           on:click={goToStep2}
-          class="min-h-[44px] md:min-h-[48px] px-5 md:px-6 text-sm md:text-base font-semibold rounded-lg hover:disabled:opacity-50 transition-colors"
-          style="color: var(--color-dominant); background-color: var(--color-accent);"
+          class="min-h-[44px] md:min-h-[48px] px-5 md:px-6 text-sm md:text-base btn-retro btn-retro-primary disabled:opacity-50"
         >
           Next: Select Words
         </button>
@@ -225,7 +222,7 @@
         </p>
         
         <!-- Display the story with clickable words -->
-        <div class="rounded-lg border border-theme-muted/30 p-3 mb-3 bg-theme-surface">
+        <div class="rounded-lg border-2 p-3 mb-3 bg-theme-surface" style="border-color: var(--color-border);">
           {#if words.length === 0}
             <p class="text-theme-muted/60 text-sm">No words found. Please write a story first.</p>
           {:else}
@@ -252,8 +249,7 @@
         <button
           type="button"
           on:click={goBackToStep1}
-          class="min-h-[44px] md:min-h-[48px] px-5 md:px-6 text-sm md:text-base font-medium border rounded-lg hover:bg-theme-muted/5 transition-colors"
-          style="color: var(--color-secondary); border-color: var(--color-border-muted);"
+          class="min-h-[44px] md:min-h-[48px] px-5 md:px-6 text-sm md:text-base btn-retro btn-retro-secondary"
         >
           Back
         </button>

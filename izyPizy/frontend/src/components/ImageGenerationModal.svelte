@@ -182,13 +182,13 @@
   function getAspectRatioClass(ratio) {
     const isActive = width === ratio.w && height === ratio.h;
     return 'px-3 py-2 rounded-lg text-sm transition-all border-2 ' + 
-      (isActive ? 'border-theme-accent bg-theme-accent/10' : 'border-theme-muted/30 hover:border-theme-muted/50');
+      (isActive ? 'border-accent bg-accent/10 shadow-retro-sm' : 'border-ink/40 hover:border-ink');
   }
 
   // Helper function to get image button class
   function getImageButtonClass(image) {
-    return 'relative group rounded-xl overflow-hidden border-4 transition-all ' + 
-      (image.selected ? 'border-theme-accent' : 'border-transparent hover:border-theme-muted/30');
+    return 'relative group rounded-lg overflow-hidden border-4 transition-all ' + 
+      (image.selected ? 'border-accent shadow-retro' : 'border-transparent hover:border-muted/40');
   }
 
   // Handle keydown for ESC
@@ -243,12 +243,12 @@
 
   <!-- Modal -->
   <div
-    class="relative w-full max-w-4xl max-h-[90vh] bg-theme-surface rounded-2xl shadow-2xl overflow-hidden overflow-y-auto"
+    class="relative w-full max-w-4xl max-h-[90vh] bg-theme-surface rounded-lg border-retro-thick shadow-retro-xl overflow-hidden overflow-y-auto"
     role="document"
   >
     <!-- Header -->
-    <div class="sticky top-0 z-10 bg-theme-surface border-b border-theme-muted/10 px-6 py-4 flex items-center justify-between">
-      <h2 class="text-xl font-bold text-theme">Generate Image</h2>
+    <div class="sticky top-0 z-10 bg-theme-surface border-b-2 px-6 py-4 flex items-center justify-between" style="border-color: var(--color-border);">
+      <h2 class="text-xl font-display" style="color: var(--color-secondary);">Generate Image</h2>
       <button
         on:click={handleCancel}
         class="rounded-full p-2 hover:bg-theme-muted/5 transition-colors"
@@ -267,7 +267,7 @@
       
       <!-- Story Preview -->
       {#if story}
-        <div class="rounded-lg bg-theme-surface-alt border border-theme-muted/10 p-4">
+        <div class="rounded-lg bg-theme-surface-alt border-2 p-4" style="border-color: var(--color-border);">
           <p class="text-sm text-theme-muted mb-1">Story:</p>
           <p class="text-lg font-medium text-theme">{story.sentence || 'No sentence'}</p>
           {#if keyElements}
@@ -291,8 +291,7 @@
             bind:value={customPrompt}
             rows="3"
             placeholder="Enter a custom prompt for the image generation..."
-            class="w-full rounded-lg border border-theme-muted/30 px-3 py-2 text-sm bg-theme-surface focus:outline-none focus:ring-2 focus:ring-theme-accent/40 resize-none"
-            style="color: var(--color-secondary);"
+            class="w-full input-retro px-3 py-2 text-sm resize-none"
             disabled={generating}
           ></textarea>
           <p class="text-xs text-theme-muted/60 mt-1">
@@ -301,10 +300,11 @@
         </div>
 
         <!-- Advanced Settings Dropdown -->
-        <div class="border-t border-theme-muted/10 pt-4">
+        <div class="border-t-2 pt-4" style="border-color: var(--color-border);">
           <button
             on:click={toggleAdvancedSettings}
-            class="w-full flex items-center justify-between p-4 rounded-lg border border-theme-muted/20 hover:bg-theme-surface-alt transition-colors"
+            class="w-full flex items-center justify-between p-4 rounded-lg border-2 hover:bg-theme-surface-alt transition-colors"
+            style="border-color: var(--color-border);"
             disabled={generating}
           >
             <span class="text-sm font-medium text-theme flex items-center gap-2">
@@ -330,8 +330,8 @@
                   <button
                     on:click={() => numImages = Math.max(1, numImages - 1)}
                     disabled={generating || numImages <= 1}
-                    class="w-8 h-8 rounded-lg border border-theme-muted/30 flex items-center justify-center hover:bg-theme-muted/5 disabled:opacity-50"
-                    style="color: var(--color-secondary);"
+                    class="w-8 h-8 rounded-lg border-2 flex items-center justify-center hover:bg-theme-surface-alt disabled:opacity-50"
+                    style="color: var(--color-secondary); border-color: var(--color-border);"
                   >
                     - 
                   </button>
@@ -339,8 +339,8 @@
                   <button
                     on:click={() => numImages = Math.min(10, numImages + 1)}
                     disabled={generating || numImages >= 10}
-                    class="w-8 h-8 rounded-lg border border-theme-muted/30 flex items-center justify-center hover:bg-theme-muted/5 disabled:opacity-50"
-                    style="color: var(--color-secondary);"
+                    class="w-8 h-8 rounded-lg border-2 flex items-center justify-center hover:bg-theme-surface-alt disabled:opacity-50"
+                    style="color: var(--color-secondary); border-color: var(--color-border);"
                   >
                     + 
                   </button>
@@ -360,7 +360,7 @@
                     class="sr-only peer"
                     disabled={generating}
                   >
-                  <div class="w-11 h-6 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-theme-muted/40 after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-theme-accent peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-theme-accent/20" style="background-color: rgba(var(--color-border-muted-rgb), 0.3);"></div>
+                  <div class="w-11 h-6 rounded-full border-2 peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-muted/40 after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-accent" style="background-color: var(--color-surface-alt); border-color: var(--color-border);"></div>
                 </label>
               </div>
 
@@ -377,7 +377,7 @@
                     class="sr-only peer"
                     disabled={generating}
                   >
-                  <div class="w-11 h-6 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-theme-muted/40 after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-theme-accent peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-theme-accent/20" style="background-color: rgba(var(--color-border-muted-rgb), 0.3);"></div>
+                  <div class="w-11 h-6 rounded-full border-2 peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-muted/40 after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-accent" style="background-color: var(--color-surface-alt); border-color: var(--color-border);"></div>
                 </label>
               </div>
 
@@ -386,15 +386,14 @@
                   <button
                     on:click={fetchEnhancedPrompt}
                     disabled={fetchingEnhancedPrompt || generating}
-                    class="text-sm px-3 py-1.5 rounded-lg border border-theme-accent/30 hover:bg-theme-accent/5 transition-colors"
-                    style="color: var(--color-accent);"
+                    class="text-sm px-3 py-1.5 btn-retro btn-retro-secondary"
                   >
                     {fetchingEnhancedPrompt ? 'Previewing...' : 'Preview Enhanced Prompt'}
                   </button>
                 </div>
                 
                 {#if enhancedPrompt}
-                  <div class="rounded-lg bg-theme-surface-alt border border-theme-accent/20 p-3">
+                  <div class="rounded-lg bg-theme-surface-alt border-2 p-3" style="border-color: var(--color-accent);">
                     <p class="text-xs font-medium text-theme-accent mb-1">Enhanced Prompt Preview:</p>
                     <p class="text-sm text-theme">{enhancedPrompt}</p>
                   </div>
@@ -406,8 +405,7 @@
                 <label class="block text-sm font-medium text-theme mb-2">Image Model</label>
                 <select
                   bind:value={selectedModel}
-                  class="w-full rounded-lg border border-theme-muted/30 px-3 py-2 text-sm bg-theme-surface focus:outline-none focus:ring-2 focus:ring-theme-accent/40"
-                  style="color: var(--color-secondary);"
+                  class="w-full input-retro px-3 py-2 text-sm"
                   disabled={generating}
                 >
                   {#each availableModels as model}
@@ -423,7 +421,7 @@
                   {#each sizeOptions as size}
                     <button
                       on:click={() => sizeFactor = size.id}
-                      class="px-3 py-2 rounded-lg text-sm font-medium transition-all border-2 {sizeFactor === size.id ? 'border-theme-accent bg-theme-accent/10' : 'border-theme-muted/30 hover:border-theme-muted/50'}"
+                      class="px-3 py-2 rounded-lg text-sm font-medium transition-all border-2 {sizeFactor === size.id ? 'border-accent bg-accent/10 shadow-retro-sm' : 'border-ink/40 hover:border-ink'}"
                       style="color: {sizeFactor === size.id ? 'var(--color-accent)' : 'var(--color-secondary)'};"
                       disabled={generating}
                     >
@@ -455,16 +453,14 @@
                   <input
                     type="number"
                     bind:value={baseWidth}
-                    class="w-20 rounded-lg border border-theme-muted/30 px-2 py-1 text-sm bg-theme-surface"
-                    style="color: var(--color-secondary);"
+                    class="w-20 input-retro px-2 py-1 text-sm"
                     disabled={generating}
                   >
                   <span class="text-theme-muted">x</span>
                   <input
                     type="number"
                     bind:value={baseHeight}
-                    class="w-20 rounded-lg border border-theme-muted/30 px-2 py-1 text-sm bg-theme-surface"
-                    style="color: var(--color-secondary);"
+                    class="w-20 input-retro px-2 py-1 text-sm"
                     disabled={generating}
                   >
                   <span class="text-xs text-theme-muted/60">pixels</span>
@@ -486,8 +482,7 @@
       <button
         on:click={handleGenerate}
         disabled={generating || (!story?.sentence && !customPrompt)}
-        class="w-full min-h-[48px] text-lg font-semibold rounded-xl transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-        style="color: var(--color-dominant); background-color: var(--color-accent);"
+        class="w-full min-h-[48px] text-lg btn-retro btn-retro-primary disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
       >
         {#if generating}
           <Loader size="sm" />
@@ -535,15 +530,13 @@
           <div class="flex gap-3 justify-end pt-2">
             <button
               on:click={handleCancel}
-              class="min-h-[44px] px-5 text-sm font-medium border rounded-lg hover:bg-theme-muted/5 transition-colors"
-              style="color: var(--color-secondary); border-color: var(--color-border-muted);"
+              class="min-h-[44px] px-5 text-sm btn-retro btn-retro-secondary"
             >
               Cancel
             </button>
             <button
               on:click={handleApply}
-              class="min-h-[44px] px-5 text-sm font-semibold rounded-lg transition-colors"
-              style="color: var(--color-dominant); background-color: var(--color-accent);"
+              class="min-h-[44px] px-5 text-sm btn-retro btn-retro-primary"
             >
               Apply Selected Image
             </button>

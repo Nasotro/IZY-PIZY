@@ -146,13 +146,12 @@
 
 <div class="w-full mx-auto px-4 py-6 md:py-8 lg:py-10 space-y-6 md:space-y-8">
   <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 md:gap-4">
-    <h1 class="text-2xl md:text-3xl font-bold text-theme">📖 Story Book</h1>
+    <h1 class="text-2xl md:text-3xl font-display" style="color: var(--color-secondary);">📖 Story Book</h1>
     <div class="flex items-center gap-2">
       {#if stories.length > 1}
         <button
           on:click={toggleSort}
-          class="min-h-[44px] md:min-h-[48px] px-3 md:px-4 text-sm md:text-base font-medium border rounded-lg hover:bg-theme-surface-alt transition-colors flex items-center gap-1"
-          style="color: var(--color-accent); border-color: var(--color-accent);"
+          class="min-h-[44px] md:min-h-[48px] px-3 md:px-4 text-sm md:text-base font-mono font-bold uppercase tracking-wider btn-retro btn-retro-secondary flex items-center gap-1"
           title={sortOrder === 'asc' ? 'Sort descending' : 'Sort ascending'}
         >
           <span>{sortOrder === 'asc' ? '↑' : '↓'}</span>
@@ -162,8 +161,7 @@
       {#if formMode === null}
         <button
           on:click={openCreate}
-          class="min-h-[44px] md:min-h-[48px] px-5 md:px-6 text-sm md:text-base font-semibold rounded-xl transition-colors shadow-sm"
-          style="color: var(--color-dominant); background-color: var(--color-accent);"
+          class="min-h-[44px] md:min-h-[48px] px-5 md:px-6 text-sm md:text-base btn-retro btn-retro-primary"
         >
           + Add Story
         </button>
@@ -182,13 +180,13 @@
       tabindex="-1"
     >
       <div
-        class="fixed bottom-0 left-0 right-0 z-50 rounded-t-2xl p-5 pb-24 md:p-6 md:pb-6 shadow-2xl max-h-[80vh] overflow-y-auto
+        class="fixed bottom-0 left-0 right-0 z-50 rounded-t-2xl p-5 pb-24 md:p-6 md:pb-6 border-retro-thick shadow-retro-xl max-h-[80vh] overflow-y-auto
                sm:bottom-auto sm:left-1/2 sm:top-1/2 sm:w-96 md:w-[480px] lg:w-[560px] sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-2xl"
         style="background-color: var(--color-dominant);"
         role="document"
       >
         <div class="mb-4 md:mb-5 flex items-center justify-between">
-          <span class="text-xl md:text-2xl font-bold text-theme">{formMode === 'edit' ? 'Edit Story' : 'Add Story'}</span>
+          <span class="text-xl md:text-2xl font-display" style="color: var(--color-secondary);">{formMode === 'edit' ? 'Edit Story' : 'Add Story'}</span>
           <button
             class="rounded-full p-1 md:p-2 hover:bg-theme-muted/5"
             style="color: var(--color-muted);"
@@ -212,8 +210,8 @@
   {:else if sortedStories.length === 0}
     <div class="text-center py-16 md:py-20" style="color: var(--color-muted);">
       <p class="text-4xl md:text-5xl mb-3">📭</p>
-      <p class="text-lg md:text-xl font-medium">No stories yet.</p>
-      <p class="text-sm md:text-base mt-1">Click <span class="font-semibold">+ Add Story</span> to create one.</p>
+      <p class="text-lg md:text-xl font-display" style="color: var(--color-secondary);">No stories yet.</p>
+      <p class="text-sm md:text-base mt-1">Click <span class="font-bold text-theme-accent">+ Add Story</span> to create one.</p>
     </div>
   {:else}
     <div class="md:grid md:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] md:gap-6 md:items-start">
@@ -224,15 +222,15 @@
             type="button"
             on:click={() => selectStory(story.id)}
             aria-pressed={selectedId === story.id}
-            class="w-full text-left rounded-xl border px-4 py-3 transition-colors {selectedId === story.id ? 'bg-theme-surface-alt shadow-sm' : 'bg-theme-surface hover:bg-theme-surface-alt'}"
+            class="w-full text-left rounded-lg border-2 px-4 py-3 transition-colors {selectedId === story.id ? 'bg-theme-surface-alt shadow-retro' : 'bg-theme-surface hover:bg-theme-surface-alt shadow-sm'}"
             style="border-color: {selectedId === story.id
               ? 'var(--color-accent)'
-              : 'color-mix(in srgb, var(--color-muted) 35%, transparent)'};"
+              : 'var(--color-border)'};"
           >
             <div class="flex items-center justify-between gap-3">
               <div class="flex flex-wrap gap-1.5">
                 {#each pairsFor(story) as pair}
-                  <span class="font-mono text-sm md:text-base font-bold px-1.5 py-0.5 rounded bg-theme-surface-alt {selectedId === story.id ? 'text-theme-accent' : ''}">{pair}</span>
+                  <span class="font-mono text-sm md:text-base font-bold px-1.5 py-0.5 rounded border-2 {selectedId === story.id ? 'text-theme-accent border-theme-accent bg-theme-surface-alt' : 'text-theme-accent border-theme-muted bg-theme-surface-alt'}">{pair}</span>
                 {/each}
               </div>
               <span class="text-xs whitespace-nowrap {selectedId === story.id ? 'text-theme-accent' : ''}" style="color: {selectedId === story.id ? 'var(--color-accent)' : 'var(--color-muted)'};">{story.position * 10 + 1} – {story.position * 10 + 10}</span>
@@ -271,7 +269,7 @@
             </div>
           {/key}
         {:else}
-          <div class="rounded-2xl border border-theme-muted/10 bg-theme-surface shadow-sm p-10 text-center" style="color: var(--color-muted);">
+          <div class="rounded-lg border-2 shadow-retro p-10 text-center bg-theme-surface" style="border-color: var(--color-border); color: var(--color-muted);">
             <p class="text-lg md:text-xl font-medium">Select a group of digits</p>
             <p class="text-sm md:text-base mt-1">Click a 10-digit group on the left to see its story and image.</p>
           </div>
@@ -284,14 +282,13 @@
       <div class="fixed inset-0 z-30 md:hidden" role="dialog" aria-modal="true" aria-label="Story details">
         <div class="absolute inset-0 bg-black/40" on:click={closeDrawer}></div>
         <div
-          class="drawer-panel absolute inset-y-0 right-0 w-full max-w-md overflow-y-auto p-4 shadow-2xl"
-          style="background-color: var(--color-dominant);"
+          class="drawer-panel absolute inset-y-0 right-0 w-full max-w-md overflow-y-auto p-4 border-l-[3px] shadow-retro-xl"
+          style="background-color: var(--color-dominant); border-color: var(--color-border);"
         >
           <div class="mb-3 flex items-center justify-between">
             <button
               on:click={closeDrawer}
-              class="flex items-center gap-1.5 min-h-[40px] px-3 text-sm font-medium rounded-lg border hover:bg-theme-surface-alt transition-colors"
-              style="color: var(--color-secondary); border-color: var(--color-border-muted);"
+              class="flex items-center gap-1.5 min-h-[40px] px-3 text-sm btn-retro btn-retro-secondary"
             >
               ← Back
             </button>
