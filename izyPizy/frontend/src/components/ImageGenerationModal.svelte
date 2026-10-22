@@ -16,7 +16,7 @@
   let customPrompt = '';
   let useMistralEnhancement = false;
   let autoRephrase = true;
-  let selectedModel = 'flux-2-pro';
+  let selectedModel = 'big';
   let baseWidth = 1024;
   let baseHeight = 1024;
   let sizeFactor = 'M'; // S, M, L, XL
@@ -38,18 +38,12 @@
   $: width = Math.round(baseWidth * getSizeOption(sizeFactor).multiplier);
   $: height = Math.round(baseHeight * getSizeOption(sizeFactor).multiplier);
   
-  // Available models for Blackforest (synced with backend WORKING_MODELS)
-  const availableModels = [
-    { id: 'flux-2-pro', name: 'FLUX.2 Pro', description: 'Stable FLUX.2 Pro - Best balance' },
-    { id: 'flux-2-pro-preview', name: 'FLUX.2 Pro (Preview)', description: 'Latest FLUX.2 Pro' },
-    { id: 'flux-2-max', name: 'FLUX.2 Max', description: 'Maximum quality' },
-    { id: 'flux-2-flex', name: 'FLUX.2 Flex', description: 'Flexible model' },
-    { id: 'flux-2-klein-9b', name: 'FLUX.2 Klein 9B', description: 'Fast 9B model' },
-    { id: 'flux-2-klein-4b', name: 'FLUX.2 Klein 4B', description: 'Fast 4B model' },
-    { id: 'flux-pro-1.1', name: 'FLUX 1.1 Pro', description: 'FLUX 1.1 Pro' },
-    { id: 'flux-pro-1.1-ultra', name: 'FLUX 1.1 Ultra', description: 'FLUX 1.1 Ultra' },
-    { id: 'flux-pro', name: 'FLUX Pro', description: 'Original FLUX Pro' },
-    { id: 'flux', name: 'FLUX', description: 'Base FLUX model' }
+  // Two tiers only. Mapped server-side to real Blackforest models:
+  //   small -> flux-2-klein-4b   (fast, ~1.4 credits)
+  //   big   -> flux-2-pro        (best quality, ~3 credits)
+  const modelTiers = [
+    { id: 'small', name: 'Small', description: 'Rapide et pas cher', hint: '~1,4 crédit / image' },
+    { id: 'big', name: 'Big', description: 'Meilleure qualité', hint: '~3 crédits / image' }
   ];
 
   // Available aspect ratios
@@ -116,8 +110,9 @@
         model: selectedModel,
         width: width,
         height: height,
+        timeout: 120,
         auto_rephrase: autoRephrase
-      }));
+      }, 120000 * numImages + 60000));
 
       // Handle the response
       if (response && response.images) {
@@ -210,8 +205,8 @@
     showAdvancedSettings = !showAdvancedSettings;
   }
 
-  // Timeout helper function (60 seconds)
-  function withTimeout(promise, ms = 60000) {
+  // Timeout helper: generous default, generation passes an explicit budget.
+  function withTimeout(promise, ms = 600000) {
     return new Promise((resolve, reject) => {
       const timeoutId = setTimeout(() => {
         reject(new Error(`Request timed out after ${ms/1000} seconds`));
@@ -400,18 +395,25 @@
                 {/if}
               {/if}
 
-              <!-- Model Selection -->
+              <!-- Model Selection: two tiers only -->
               <div>
                 <label class="block text-sm font-medium text-theme mb-2">Image Model</label>
-                <select
-                  bind:value={selectedModel}
-                  class="w-full input-retro px-3 py-2 text-sm"
-                  disabled={generating}
-                >
-                  {#each availableModels as model}
-                    <option value={model.id}>{model.name} - {model.description}</option>
+                <div class="grid grid-cols-2 gap-3">
+                  {#each modelTiers as tier}
+                    <button
+                      type="button"
+                      on:click={() => selectedModel = tier.id}
+                      disabled={generating}
+                      class="text-left px-4 py-3 rounded-lg border-2 transition-all {selectedModel === tier.id ? 'border-accent bg-accent/10 shadow-retro-sm' : 'border-ink/40 hover:border-ink'}"
+                    >
+                      <span class="block font-display text-base" style="color: {selectedModel === tier.id ? 'var(--color-accent)' : 'var(--color-secondary)'};">
+                        {tier.name}
+                      </span>
+                      <span class="block text-xs text-theme-muted">{tier.description}</span>
+                      <span class="block text-xs text-theme-muted/60 mt-1">{tier.hint}</span>
+                    </button>
                   {/each}
-                </select>
+                </div>
               </div>
 
               <!-- Size Factor -->

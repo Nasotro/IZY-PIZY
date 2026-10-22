@@ -33,9 +33,10 @@ class ImageGenerationOptions(BaseModel):
     num_images: int = 1
     custom_prompt: Optional[str] = None
     use_mistral_enhancement: bool = False
-    model: str = "flux-2-pro"
+    model: str = "big"
     width: int = 1024
     height: int = 1024
+    timeout: int = 120
     auto_rephrase: bool = True
 
 

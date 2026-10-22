@@ -1,7 +1,16 @@
 [project]
 name = "backend"
 version = "0.1.0"
-description = "Add your description here"
+description = "IZY PIZY backend (FastAPI) - pi memorization stories and image generation"
 readme = "README.md"
-requires-python = ">=3.14"
-dependencies = []
+requires-python = ">=3.13,<3.14"
+dependencies = [
+    "fastapi",
+    "uvicorn[standard]",
+    "aiosqlite",
+    "python-dotenv",
+    "firebase-admin",
+    "httpx",
+    "aiohttp",
+    "pillow",
+]

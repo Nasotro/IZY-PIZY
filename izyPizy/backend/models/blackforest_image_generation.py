@@ -9,6 +9,28 @@ from typing import Optional
 import config
 
 
+# --- Model catalogue -------------------------------------------------------
+# Only two tiers are exposed to the UI: "small" (fast & cheap) and "big"
+# (best quality). Both are real, currently working Blackforest endpoints.
+MODEL_SMALL = "flux-2-klein-4b"   # ~1.4 credits, fast
+MODEL_BIG = "flux-2-pro"          # ~3 credits, best balance/quality
+DEFAULT_MODEL = MODEL_BIG
+
+# The only accepted values: the tier name itself. Anything else is ignored and
+# falls back to the default tier rather than reaching a non-existent endpoint.
+MODEL_TIERS = {
+    "small": MODEL_SMALL,
+    "big": MODEL_BIG,
+}
+
+
+def resolve_model(model: Optional[str]) -> str:
+    """Map a tier name ("small"/"big") or None to a real Blackforest model id."""
+    if not model:
+        return DEFAULT_MODEL
+    return MODEL_TIERS.get(model.strip().lower(), DEFAULT_MODEL)
+
+
 class BlackforestImageGenerator:
     """Handles image generation using Blackforest Labs FLUX API."""
     
@@ -22,7 +44,7 @@ class BlackforestImageGenerator:
         """
         self.api_key = api_key
         self.base_url = base_url or "https://api.bfl.ai/v1"
-        self.default_model = "flux-2-pro"
+        self.default_model = DEFAULT_MODEL
         print(f"[DEBUG] BlackforestImageGenerator initialized with base_url: {self.base_url}")
     
     async def generate_image(
@@ -33,7 +55,7 @@ class BlackforestImageGenerator:
         height: int = 1024,
         model: str = None,
         use_mistral_enhancement: bool = False,
-        timeout: float = 20.0,
+        timeout: float = 120.0,
         key_elements: list[str] | None = None,
         auto_rephrase: bool = True
     ) -> str:
@@ -57,9 +79,8 @@ class BlackforestImageGenerator:
         Raises:
             RuntimeError: If image generation fails
         """
-        # Use default model if not specified
-        if model is None:
-            model = self.default_model
+        # Resolve tier names ("small" / "big") and legacy ids to a real model
+        model = resolve_model(model) or self.default_model
         
         start_time = time.time()
         tried_prompts = []
@@ -333,7 +354,7 @@ Rephrased prompt (generic, non-copyrighted):"""
             }
 
             payload = {
-                "model": "mistral-tiny",
+                "model": "mistral-small-latest",
                 "messages": [
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": user_prompt}
@@ -464,7 +485,7 @@ Enhanced prompt:"""
             }
 
             payload = {
-                "model": "mistral-tiny",
+                "model": "mistral-small-latest",
                 "messages": [
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": user_prompt}
@@ -606,7 +627,7 @@ async def generate_image_from_prompt(
     model: str = None,
     use_mistral_enhancement: bool = False,
     key_elements: list[str] | None = None,
-    timeout: float = 20.0,
+    timeout: float = 120.0,
     auto_rephrase: bool = True
 ) -> str:
     """

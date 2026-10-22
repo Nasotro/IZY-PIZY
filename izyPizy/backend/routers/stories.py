@@ -329,11 +329,11 @@ async def generate_story_image(
 
     height: int = Query(default=1024, ge=256, le=2048),
 
-    model: str = Query(default="flux-2-pro"),
+    model: str = Query(default="big"),
 
     use_mistral: bool = Query(default=False),
 
-    timeout: int = Query(default=20, ge=1, le=1800),
+    timeout: int = Query(default=120, ge=1, le=1800),
     auto_rephrase: bool = Query(default=True),
 
     db: Connection = Depends(get_db),
@@ -347,13 +347,13 @@ async def generate_story_image(
     Supports optional query parameters:
     - width: Image width in pixels (256-2048, default: 1024)
     - height: Image height in pixels (256-2048, default: 1024)
-    - model: Blackforest model to use (default: flux-2-pro)
+    - model: "small" (fast/cheap) or "big" (best quality) - default: big
     - use_mistral: Whether to enhance prompt with Mistral (default: False)
-    - timeout: Maximum wait time in seconds (1-1800, default: 20)
+    - timeout: Maximum wait time in seconds (1-1800, default: 120)
     - auto_rephrase: Whether to automatically rephrase prompts that trigger moderation (default: True)
     """
 
-    from models.blackforest_image_generation import generate_image_from_prompt
+    from models.blackforest_image_generation import generate_image_from_prompt, MODEL_TIERS
 
     
 
@@ -394,6 +394,13 @@ async def generate_story_image(
         )
 
     
+
+    # Only the two real tiers are valid; anything else is a client bug.
+    if model not in MODEL_TIERS:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Unknown model tier '{model}'. Valid values: {', '.join(MODEL_TIERS)}"
+        )
 
     # Check if Blackforest API key is configured (not required in local mode)
     if not config.BFL_API_KEY and not config.LOCAL_MODE:
@@ -552,7 +559,7 @@ async def generate_story_image_batch(
     current_user: CurrentUser = Depends(get_current_user),
 ):
     """Generate multiple images for a story with custom options."""
-    from models.blackforest_image_generation import generate_image_from_prompt
+    from models.blackforest_image_generation import generate_image_from_prompt, MODEL_TIERS
     user_id = current_user.uid
     async with db.execute(
         "SELECT * FROM stories WHERE id = ? AND user_id = ?", (story_id, user_id)
@@ -569,10 +576,16 @@ async def generate_story_image_batch(
         options = {}
     num_images = min(max(options.get('num_images', 1), 1), 10)
     use_mistral = options.get('use_mistral_enhancement', False)
-    model = options.get('model', 'flux-2-pro')
+    model = options.get('model', 'big')
+    if model not in MODEL_TIERS:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Unknown model tier '{model}'. Valid values: {', '.join(MODEL_TIERS)}"
+        )
     width = options.get('width', 1024)
     height = options.get('height', 1024)
     auto_rephrase = options.get('auto_rephrase', True)
+    timeout = min(max(int(options.get('timeout', 120)), 1), 1800)
     prompt = options.get('custom_prompt') or story.sentence
     key_elements = [story.word_0, story.word_1, story.word_2, story.word_3, story.word_4]
     key_elements = [w for w in key_elements if w and w.strip()] or None
@@ -584,8 +597,9 @@ async def generate_story_image_batch(
             image_path = image_dir / image_filename
             await generate_image_from_prompt(
                 prompt, str(image_path), width=width, height=height,
-                model=model, use_mistral_enhancement=use_mistral, 
-                auto_rephrase=auto_rephrase, key_elements=key_elements
+                model=model, use_mistral_enhancement=use_mistral,
+                timeout=timeout, auto_rephrase=auto_rephrase,
+                key_elements=key_elements
             )
             relative_path = image_filename
             image_url = f"{config.IMAGE_BASE_URL}/{relative_path}"
