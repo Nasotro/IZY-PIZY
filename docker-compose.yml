@@ -18,8 +18,8 @@ services:
     build:
       context: .
       dockerfile: izyPizy/Dockerfile.frontend
-    ports:
-      - "5173:8080"
+    expose:
+      - "8080"
     depends_on:
       - backend
 
