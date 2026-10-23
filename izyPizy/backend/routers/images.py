@@ -1,29 +1,33 @@
+import mimetypes
+
 from fastapi import APIRouter, Response
-from fastapi.staticfiles import StaticFiles
+
 import config
-from pathlib import Path
 
 router = APIRouter()
 
-# Custom route to handle image requests
-# This handles both old format (images/filename.png) and new format (filename.png)
+
 @router.get("/images/{image_path:path}")
 async def serve_image(image_path: str):
+    """Serve a generated image or video from the storage directory.
+
+    Handles both the legacy path format (``images/filename.png``) and the flat
+    one. The media type is derived from the extension: generated videos used to
+    be served as ``image/png``, which browsers refuse to play.
     """
-    Serve an image file.
-    
-    Handles both old path format (images/filename.png) and new format (filename.png).
-    For backwards compatibility, if the path starts with 'images/', we strip it.
-    """
-    # Remove 'images/' prefix if present (for backwards compatibility)
     if image_path.startswith("images/"):
-        actual_path = image_path[7:]  # Remove the first 7 characters "images/"
+        actual_path = image_path[7:]
     else:
         actual_path = image_path
-    
-    file_path = config.IMAGE_STORAGE_DIR / actual_path
-    
-    if not file_path.exists():
+
+    file_path = (config.IMAGE_STORAGE_DIR / actual_path).resolve()
+    # Never serve outside the storage directory.
+    if config.IMAGE_STORAGE_DIR not in file_path.parents or not file_path.is_file():
         return Response(status_code=404, content="Image not found")
-    
-    return Response(content=file_path.read_bytes(), media_type="image/png")
+
+    media_type = mimetypes.guess_type(file_path.name)[0] or "application/octet-stream"
+    return Response(
+        content=file_path.read_bytes(),
+        media_type=media_type,
+        headers={"Cache-Control": "public, max-age=3600"},
+    )

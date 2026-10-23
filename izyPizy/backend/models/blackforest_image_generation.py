@@ -57,7 +57,9 @@ class BlackforestImageGenerator:
         use_mistral_enhancement: bool = False,
         timeout: float = 120.0,
         key_elements: list[str] | None = None,
-        auto_rephrase: bool = True
+        auto_rephrase: bool = True,
+        reference_images: list[str] | None = None,
+        output_format: str | None = None
     ) -> str:
         """
         Generate an image from a text prompt using Blackforest FLUX API and save it locally.
@@ -107,6 +109,13 @@ class BlackforestImageGenerator:
                 "width": width,
                 "height": height
             }
+            if output_format:
+                payload["output_format"] = output_format
+            # Reference images: FLUX.2 accepts input_image, input_image_2, ...
+            # flux-2-pro takes up to 8, klein up to 4 (the caller checks).
+            for index, ref in enumerate(reference_images or []):
+                key = "input_image" if index == 0 else f"input_image_{index + 1}"
+                payload[key] = ref
             
             print(f"[DEBUG] Sending payload with prompt length={len(enhanced_prompt)}, prompt_preview={enhanced_prompt[:100]}")
             
@@ -628,7 +637,9 @@ async def generate_image_from_prompt(
     use_mistral_enhancement: bool = False,
     key_elements: list[str] | None = None,
     timeout: float = 120.0,
-    auto_rephrase: bool = True
+    auto_rephrase: bool = True,
+    reference_images: list[str] | None = None,
+    output_format: str | None = None
 ) -> str:
     """
     Generate an image from a text prompt using Blackforest FLUX API.
@@ -649,7 +660,9 @@ async def generate_image_from_prompt(
     Returns:
         The output path where the image was saved
     """
-    if config.LOCAL_MODE:
+    # Local mode without a key = offline placeholders. Local mode *with* a key
+    # (developer running the UI locally) still calls the real API.
+    if config.LOCAL_MODE and not config.BFL_API_KEY:
         return await _generate_local_placeholder(prompt, output_path, width, height)
 
     generator = await get_blackforest_generator(config.BFL_API_KEY)
@@ -662,5 +675,7 @@ async def generate_image_from_prompt(
         use_mistral_enhancement=use_mistral_enhancement,
         key_elements=key_elements,
         timeout=timeout,
-        auto_rephrase=auto_rephrase
+        auto_rephrase=auto_rephrase,
+        reference_images=reference_images,
+        output_format=output_format
     )

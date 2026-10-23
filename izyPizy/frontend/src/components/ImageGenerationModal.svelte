@@ -1,5 +1,5 @@
 <script>
-  import { generateStoryImageBatch, getImageUrl, setStoryImage, getEnhancedPromptPreview } from '../lib/api.js';
+  import { getImageUrl, setStoryImage, getEnhancedPromptPreview, generateStoryVisual, getDictionary } from '../lib/api.js';
   import Loader from './Loader.svelte';
 
   /** @type {{ id: number, position: number, sentence: string, word_0: string, word_1: string, word_2: string, word_3: string, word_4: string, image_path: string | null }} */
@@ -20,6 +20,57 @@
   let baseWidth = 1024;
   let baseHeight = 1024;
   let sizeFactor = 'M'; // S, M, L, XL
+
+  // Visual kind + word icons
+  let visualKind = 'image';   // 'image' | 'video'
+  let useWordIcons = false;
+  let videoDuration = 5;
+  let videoDraft = true;
+
+  let iconStatus = {};        // lower(word) -> true when an icon exists
+  let iconsChecked = false;
+  let loadedForStory = null;
+
+  $: storyWords = story
+    ? [story.word_0, story.word_1, story.word_2, story.word_3, story.word_4].filter((w) => w && w.trim())
+    : [];
+  $: missingIcons = storyWords.filter((w) => !iconStatus[w.trim().toLowerCase()]);
+  $: iconsReady = iconsChecked && missingIcons.length === 0;
+
+  // Load which words of this story already have an icon
+  $: if (story && story.id !== loadedForStory) {
+    loadedForStory = story.id;
+    loadIconStatus();
+  }
+
+  async function loadIconStatus() {
+    iconsChecked = false;
+    try {
+      const data = await getDictionary();
+      const map = {};
+      for (const entry of data) {
+        for (const w of entry.words) {
+          const key = w.word.trim().toLowerCase();
+          if (w.has_icon) map[key] = true;
+          else if (!(key in map)) map[key] = false;
+        }
+      }
+      iconStatus = map;
+      const stillMissing = storyWords.filter((w) => !map[w.trim().toLowerCase()]);
+      if (stillMissing.length > 0) useWordIcons = false;
+    } catch (e) {
+      iconStatus = {};
+      useWordIcons = false;
+    } finally {
+      iconsChecked = true;
+    }
+  }
+
+  // Video clips take ~90s each; images keep the per-image budget.
+  function generationBudget() {
+    if (visualKind === 'video') return 900000;
+    return 120000 * numImages + 60000;
+  }
   
   // Size multipliers
   const sizeOptions = [
@@ -60,6 +111,10 @@
   let generatedImages = []; // { url: string, path: string, selected: boolean }[]
   let generationProgress = []; // Track progress for each image
   let error = '';
+  let generatedVideo = null;
+  let resultStory = null;
+  let planNotes = [];
+  let directorPlan = null;
   let previewPrompt = '';
   let enhancedPrompt = '';
   let fetchingEnhancedPrompt = false;
@@ -72,7 +127,13 @@
   $: keyElements = story ? [story.word_0, story.word_1, story.word_2, story.word_3, story.word_4].filter(w => w && w.trim()).join(', ') : '';
 
   // Preview the prompt that will be used
-  $: previewPrompt = (customPrompt || (story && story.sentence) || '') + (useMistralEnhancement ? ' (enhanced with Mistral)' : '') + ' - ' + width + 'x' + height + ' - Model: ' + selectedModel + (keyElements ? ' - Key elements: ' + keyElements : '');
+  $: previewPrompt = (customPrompt || (story && story.sentence) || '')
+    + (useMistralEnhancement ? ' (Mistral director)' : '')
+    + ' - ' + width + 'x' + height
+    + ' - Model: ' + selectedModel
+    + (visualKind === 'video' ? ' - Video ' + videoDuration + 's' + (videoDraft ? ' (draft)' : ' (rendu final)') : '')
+    + (useWordIcons ? ' - word icons: ' + storyWords.join(', ') : '')
+    + (keyElements ? ' - Key elements: ' + keyElements : '');
 
   // Fetch enhanced prompt preview
   async function fetchEnhancedPrompt() {
@@ -100,37 +161,46 @@
     generating = true;
     error = '';
     generatedImages = [];
+    generatedVideo = null;
+    resultStory = null;
+    planNotes = [];
+    directorPlan = null;
     generationProgress = Array(numImages).fill({ status: 'pending', progress: 0 });
 
     try {
-      const response = await withTimeout(generateStoryImageBatch(story.id, {
-        num_images: numImages,
+      const options = {
+        kind: visualKind,
+        use_word_icons: useWordIcons,
+        num_images: visualKind === 'image' ? numImages : 1,
         custom_prompt: customPrompt || null,
         use_mistral_enhancement: useMistralEnhancement,
         model: selectedModel,
         width: width,
         height: height,
-        timeout: 120,
-        auto_rephrase: autoRephrase
-      }, 120000 * numImages + 60000));
+        timeout: 180,
+        auto_rephrase: autoRephrase,
+        duration: videoDuration,
+        draft: videoDraft,
+      };
+      const response = await withTimeout(generateStoryVisual(story.id, options), generationBudget());
 
-      // Handle the response
-      if (response && response.images) {
+      generatedVideo = response.video_url || null;
+      planNotes = response.notes || [];
+      directorPlan = response.plan || null;
+
+      if (response.images && response.images.length > 0) {
         generatedImages = response.images.map((img, index) => ({
           url: getImageUrl(img.path),
           path: img.path,
-          selected: index === 0 // Auto-select the first one
+          selected: index === 0
         }));
-      } else if (response && response.image_path) {
-        // Fallback: single image generated
-        generatedImages = [{
-          url: getImageUrl(response.image_path),
-          path: response.image_path,
-          selected: true
-        }];
       }
+
+      // The backend already stored the visual; keep the modal open so the user
+      // can pick another image or replay the clip before closing.
+      resultStory = response.story || null;
     } catch (e) {
-      error = e.message || 'Failed to generate images';
+      error = e.message || 'Failed to generate the visual';
     } finally {
       generating = false;
     }
@@ -273,6 +343,98 @@
         </div>
       {/if}
 
+      <!-- Visual kind -->
+      <div>
+        <label class="block text-sm font-medium text-theme mb-2">What to generate</label>
+        <div class="grid grid-cols-2 gap-3">
+          <button
+            type="button"
+            on:click={() => visualKind = 'image'}
+            disabled={generating}
+            class="text-left px-4 py-3 rounded-lg border-2 transition-all {visualKind === 'image' ? 'border-accent bg-accent/10 shadow-retro-sm' : 'border-ink/40 hover:border-ink'}"
+          >
+            <span class="block font-display text-base" style="color: {visualKind === 'image' ? 'var(--color-accent)' : 'var(--color-secondary)'};">Image</span>
+            <span class="block text-xs text-theme-muted">Une illustration fixe</span>
+            <span class="block text-xs text-theme-muted/60 mt-1">~3 crédits</span>
+          </button>
+          <button
+            type="button"
+            on:click={() => visualKind = 'video'}
+            disabled={generating}
+            class="text-left px-4 py-3 rounded-lg border-2 transition-all {visualKind === 'video' ? 'border-accent bg-accent/10 shadow-retro-sm' : 'border-ink/40 hover:border-ink'}"
+          >
+            <span class="block font-display text-base" style="color: {visualKind === 'video' ? 'var(--color-accent)' : 'var(--color-secondary)'};">Vidéo</span>
+            <span class="block text-xs text-theme-muted">2 keyframes + animation</span>
+            <span class="block text-xs text-theme-muted/60 mt-1">draft gratuit</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Word icons -->
+      <div class="rounded-lg border-2 p-4" style="border-color: var(--color-border);">
+        <div class="flex items-center justify-between gap-3">
+          <div>
+            <label class="block text-sm font-medium text-theme mb-1">Use word icons</label>
+            <p class="text-xs text-theme-muted/60">
+              {#if !iconsChecked}
+                Checking icons…
+              {:else if iconsReady}
+                All {storyWords.length} words have an icon ({storyWords.join(', ')})
+              {:else}
+                Missing icon{missingIcons.length > 1 ? 's' : ''}: <span class="font-medium" style="color: var(--color-accent);">{missingIcons.join(', ')}</span> — create them in the Dictionary
+              {/if}
+            </p>
+          </div>
+          <label class="relative inline-flex items-center cursor-pointer" class:opacity-40={!iconsReady}>
+            <input
+              type="checkbox"
+              bind:checked={useWordIcons}
+              class="sr-only peer"
+              disabled={generating || !iconsReady}
+            >
+            <div class="w-11 h-6 rounded-full border-2 peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-muted/40 after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-accent" style="background-color: var(--color-surface-alt); border-color: var(--color-border);"></div>
+          </label>
+        </div>
+        {#if useWordIcons}
+          <p class="mt-2 text-xs text-theme-muted/60">
+            The icons are sent as reference images, so the objects keep the exact look you drew.
+          </p>
+        {/if}
+      </div>
+
+      <!-- Video options -->
+      {#if visualKind === 'video'}
+        <div class="rounded-lg border-2 p-4 space-y-4" style="border-color: var(--color-border);">
+          <div>
+            <label class="block text-sm font-medium text-theme mb-2">Duration</label>
+            <div class="flex gap-2">
+              {#each [5, 8, 10] as d}
+                <button
+                  on:click={() => videoDuration = d}
+                  disabled={generating}
+                  class="px-4 py-2 rounded-lg text-sm font-medium border-2 transition-all {videoDuration === d ? 'border-accent bg-accent/10 shadow-retro-sm' : 'border-ink/40 hover:border-ink'}"
+                  style="color: {videoDuration === d ? 'var(--color-accent)' : 'var(--color-secondary)'};"
+                >{d}s</button>
+              {/each}
+            </div>
+            <p class="text-xs text-theme-muted/60 mt-1">5s minimum (API), 24 fps, 121 frames.</p>
+          </div>
+
+          <div class="flex items-center justify-between">
+            <div>
+              <label class="block text-sm font-medium text-theme mb-1">Draft render</label>
+              <p class="text-xs text-theme-muted/60">
+                {videoDraft ? 'Preview quality, free — validate before paying.' : 'Final quality, billed (~$0.75 for 5s).'}
+              </p>
+            </div>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" bind:checked={videoDraft} class="sr-only peer" disabled={generating}>
+              <div class="w-11 h-6 rounded-full border-2 peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-muted/40 after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-accent" style="background-color: var(--color-surface-alt); border-color: var(--color-border);"></div>
+            </label>
+          </div>
+        </div>
+      {/if}
+
       <!-- Customization Options -->
       <div class="space-y-5">
         
@@ -316,6 +478,7 @@
           {#if showAdvancedSettings}
             <div class="mt-4 space-y-5">
               <!-- Number of Images -->
+              {#if visualKind === 'image'}
               <div class="flex items-center justify-between">
                 <div>
                   <label class="block text-sm font-medium text-theme mb-1">Number of Images</label>
@@ -341,6 +504,7 @@
                   </button>
                 </div>
               </div>
+              {/if}
 
               <!-- Mistral Enhancement Toggle -->
               <div class="flex items-center justify-between">
@@ -488,7 +652,9 @@
       >
         {#if generating}
           <Loader size="sm" />
-          Generating {generatedImages.length}/{numImages} images...
+          {visualKind === 'video' ? 'Generating animation (~90s)…' : 'Generating ' + generatedImages.length + '/' + numImages + ' images...'}
+        {:else if visualKind === 'video'}
+          Generate Video
         {:else}
           Generate Images
         {/if}
@@ -496,6 +662,46 @@
 
       {#if error}
         <p class="text-sm text-red-500 text-center">{error}</p>
+      {/if}
+
+      <!-- Generated video -->
+      {#if generatedVideo}
+        <div class="space-y-4">
+          <h3 class="text-lg font-semibold text-theme">Your animation</h3>
+          <video
+            src={generatedVideo}
+            poster={story?.image_url}
+            controls
+            autoplay
+            loop
+            muted
+            playsinline
+            class="w-full rounded-lg border-4"
+            style="border-color: var(--color-border);"
+          ></video>
+          {#if planNotes.length > 0}
+            <ul class="text-xs text-theme-muted space-y-1">
+              {#each planNotes as note}
+                <li>• {note}</li>
+              {/each}
+            </ul>
+          {/if}
+          {#if directorPlan}
+            <div class="rounded-lg bg-theme-surface-alt border-2 p-3 text-xs" style="border-color: var(--color-border);">
+              <p class="font-medium mb-1" style="color: var(--color-accent);">Director plan</p>
+              <p><span class="text-theme-muted">Opening:</span> {(directorPlan.start_objects || []).join(', ') || '—'}</p>
+              <p><span class="text-theme-muted">Appearing:</span> {(directorPlan.appearing_objects || []).join(', ') || '—'}</p>
+              {#if directorPlan.motion_prompt}
+                <p class="mt-1"><span class="text-theme-muted">Motion:</span> {directorPlan.motion_prompt}</p>
+              {/if}
+            </div>
+          {/if}
+          <div class="flex justify-end">
+            <button on:click={() => onComplete(resultStory || story)} class="min-h-[44px] px-5 text-sm btn-retro btn-retro-primary">
+              Done
+            </button>
+          </div>
+        </div>
       {/if}
 
       <!-- Generated Images Grid -->

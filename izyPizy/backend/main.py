@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from firebase_admin import credentials, initialize_app
 
 from database import init_db
-from routers import pi, dictionary, stories, training, auth, images
+from routers import pi, dictionary, stories, training, auth, images, word_icons, visuals
 import config
 
 # Load Firebase credentials from environment variable
@@ -52,6 +52,8 @@ app.include_router(stories.router, prefix="/api")
 app.include_router(training.router, prefix="/api")
 app.include_router(auth.router, prefix="/api")
 app.include_router(images.router, prefix="/api")
+app.include_router(word_icons.router, prefix="/api")
+app.include_router(visuals.router, prefix="/api")
 
 
 @app.get("/api/health")

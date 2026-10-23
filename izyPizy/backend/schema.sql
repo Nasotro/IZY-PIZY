@@ -21,5 +21,24 @@ CREATE TABLE IF NOT EXISTS stories (
     word_3   TEXT NOT NULL,
     word_4   TEXT NOT NULL,
     image_path TEXT,
+    video_path TEXT,
+    start_frame_path TEXT,
+    end_frame_path TEXT,
+    visual_kind TEXT,
     UNIQUE(user_id, position)
+);
+
+-- One icon per distinct word, shared by every dictionary entry spelling it the
+-- same way (the same word can sit under several two-digit numbers).
+CREATE TABLE IF NOT EXISTS word_icons (
+    id               INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id          TEXT    NOT NULL,
+    word_key         TEXT    NOT NULL,
+    image_path       TEXT    NOT NULL,
+    user_description TEXT,
+    prompt           TEXT,
+    model            TEXT,
+    created_at       TEXT    NOT NULL DEFAULT (datetime('now')),
+    updated_at       TEXT,
+    UNIQUE(user_id, word_key)
 );

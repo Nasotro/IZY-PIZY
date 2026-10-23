@@ -56,6 +56,19 @@ export const updateWord = (wordId, word) =>
 export const deleteWord = (wordId) =>
   apiFetch(`/dictionary/words/${wordId}`, { method: 'DELETE' });
 
+// Word icons
+export const getWordIcon = (wordId) =>
+  apiFetch(`/dictionary/words/${wordId}/icon`);
+
+export const generateWordIcon = (wordId, { description = '', model = 'small' } = {}) =>
+  apiFetch(`/dictionary/words/${wordId}/icon`, {
+    method: 'POST',
+    body: JSON.stringify({ description, model }),
+  });
+
+export const deleteWordIcon = (wordId) =>
+  apiFetch(`/dictionary/words/${wordId}/icon`, { method: 'DELETE' });
+
 // Stories
 export const getStories = (position = null) => {
   const query = position !== null ? `?position=${position}` : '';
@@ -86,6 +99,13 @@ export const generateStoryImage = (storyId) =>
 // NEW: Generate multiple images for a story with custom options
 export const generateStoryImageBatch = (storyId, options = {}) =>
   apiFetch(`/stories/${storyId}/generate-image-batch`, {
+    method: 'POST',
+    body: JSON.stringify(options),
+  });
+
+// Generate the story visual: image, or video built from word icons
+export const generateStoryVisual = (storyId, options = {}) =>
+  apiFetch(`/stories/${storyId}/generate-visual`, {
     method: 'POST',
     body: JSON.stringify(options),
   });

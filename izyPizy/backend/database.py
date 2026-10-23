@@ -21,6 +21,10 @@ EXPECTED_COLUMNS = {
         "word_3": "TEXT NOT NULL DEFAULT ''",
         "word_4": "TEXT NOT NULL DEFAULT ''",
         "image_path": "TEXT",
+        "video_path": "TEXT",
+        "start_frame_path": "TEXT",
+        "end_frame_path": "TEXT",
+        "visual_kind": "TEXT",
     },
     "dictionary_words": {
         "user_id": "TEXT NOT NULL DEFAULT ''",

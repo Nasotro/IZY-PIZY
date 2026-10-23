@@ -102,6 +102,12 @@
             <span style="color: var(--color-muted);">—</span>
           {/if}
         </span>
+        {#if !isEmpty}
+          {@const iconCount = words.filter((w) => w.has_icon).length}
+          <span class="ml-2 font-mono text-xs" style="color: {iconCount === words.length ? 'var(--color-accent)' : 'var(--color-muted)'};">
+            {iconCount}/{words.length} icons
+          </span>
+        {/if}
         <span class="ml-2" style="color: var(--color-muted);">→</span>
       </button>
     {/each}

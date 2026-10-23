@@ -8,6 +8,8 @@ class WordCreate(BaseModel):
 class WordOut(BaseModel):
     id: int
     word: str
+    has_icon: bool = False
+    icon_url: str | None = None
 
 
 class DictionaryEntry(BaseModel):

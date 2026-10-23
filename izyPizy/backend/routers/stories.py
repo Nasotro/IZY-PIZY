@@ -80,6 +80,20 @@ def _row_to_story(row) -> StoryOut:
     image_url = None
     if image_path:
         image_url = f"{config.IMAGE_BASE_URL}/{image_path}"
+
+    def _get(key):
+        try:
+            return row[key]
+        except (KeyError, IndexError, TypeError):
+            return None
+
+    video_path = _get("video_path")
+    start_frame_path = _get("start_frame_path")
+    end_frame_path = _get("end_frame_path")
+
+    def _url(path_value):
+        return f"{config.IMAGE_BASE_URL}/{path_value}" if path_value else None
+
     return StoryOut(
         id=row["id"],
         position=row["position"],
@@ -91,6 +105,11 @@ def _row_to_story(row) -> StoryOut:
         word_4=row["word_4"],
         image_path=image_path,
         image_url=image_url,
+        video_path=video_path,
+        video_url=_url(video_path),
+        start_frame_url=_url(start_frame_path),
+        end_frame_url=_url(end_frame_path),
+        visual_kind=_get("visual_kind"),
     )
 
 

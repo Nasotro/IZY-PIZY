@@ -26,6 +26,12 @@ MISTRAL_API_KEY: str = os.getenv("MISTRAL_API_KEY", "")
 BFL_API_KEY: str = os.getenv("BFL_API_KEY", "")
 BFL_BASE_URL: str = os.getenv("BFL_BASE_URL", "https://api.bfl.ai/v1")
 
+# Mistral models. The director needs the smartest model we can afford: it plans
+# which objects open the scene and which appear later, and a 500-token call
+# costs a fraction of a cent.
+MISTRAL_DIRECTOR_MODEL: str = os.getenv("MISTRAL_DIRECTOR_MODEL", "mistral-large-latest")
+MISTRAL_PROMPT_MODEL: str = os.getenv("MISTRAL_PROMPT_MODEL", "mistral-small-latest")
+
 # Use BFL_API_KEY if available, otherwise fall back to RUNWARE_API_KEY for backward compatibility
 # Local mode: run fully offline without any external API keys.
 # - Auto-enabled when no image-generation API key is configured

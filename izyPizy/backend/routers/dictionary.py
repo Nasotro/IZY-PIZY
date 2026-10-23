@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from aiosqlite import Connection
 
+import config
 from database import get_db
 from models.dictionary import DictionaryEntry, WordCreate, WordOut
 from dependencies import CurrentUser, get_current_user
@@ -20,15 +21,33 @@ async def get_dictionary(
     ) as cursor:
         numbers = [row["number"] async for row in cursor]
 
+    # Left join on the lower-cased spelling so every entry sharing a word
+    # (the same word can live under several numbers) shows the same icon.
     async with db.execute(
-        "SELECT id, number, word FROM dictionary_words WHERE user_id = ? ORDER BY id",
+        """
+        SELECT w.id, w.number, w.word, i.image_path AS icon_path
+        FROM dictionary_words w
+        LEFT JOIN word_icons i
+               ON i.user_id = w.user_id
+              AND i.word_key = lower(trim(w.word))
+        WHERE w.user_id = ?
+        ORDER BY w.id
+        """,
         (user_id,),
     ) as cursor:
         rows = await cursor.fetchall()
 
     words_by_number: dict[str, list[WordOut]] = {n: [] for n in numbers}
     for row in rows:
-        words_by_number[row["number"]].append(WordOut(id=row["id"], word=row["word"]))
+        icon_path = row["icon_path"]
+        words_by_number[row["number"]].append(
+            WordOut(
+                id=row["id"],
+                word=row["word"],
+                has_icon=bool(icon_path),
+                icon_url=f"{config.IMAGE_BASE_URL}/{icon_path}" if icon_path else None,
+            )
+        )
 
     return [
         DictionaryEntry(number=num, words=words_by_number[num]) for num in numbers

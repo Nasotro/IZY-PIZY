@@ -20,6 +20,7 @@
   $: highlightedSentence = getHighlightedSentence(story.sentence, words);
   
   $: imageSrc = story.image_url;
+  $: videoSrc = story.video_url || null;
   $: canGenerateImage = !!story.sentence;
 
   function getHighlightedSentence(sentence, wordList) {
@@ -73,7 +74,22 @@
 
   <div class="px-4 py-3 md:px-6 md:py-4">
 
-    {#if imageSrc}
+    {#if videoSrc}
+      <div class="mb-4 flex justify-center">
+        <div class="relative inline-block border-2 shadow-retro-sm" style="border-color: var(--color-border); background-color: var(--color-bg-tertiary); padding: 6px;">
+          <span class="absolute -top-2.5 left-6 h-6 w-16 -rotate-6 opacity-85" style="background-color: #F4A261; border: 1px solid var(--color-border);"></span>
+          <video
+            src={videoSrc}
+            poster={imageSrc}
+            autoplay
+            loop
+            muted
+            playsinline
+            class="max-w-full max-h-48 md:max-h-64 object-contain"
+          ></video>
+        </div>
+      </div>
+    {:else if imageSrc}
       <div class="mb-4 flex justify-center">
         <div class="relative inline-block border-2 shadow-retro-sm" style="border-color: var(--color-border); background-color: var(--color-bg-tertiary); padding: 6px;">
           <span class="absolute -top-2.5 left-6 h-6 w-16 -rotate-6 opacity-85" style="background-color: #F4A261; border: 1px solid var(--color-border);"></span>
@@ -121,7 +137,7 @@
             {/if}
           {:else if imageSrc}
             <span class="min-h-[40px] md:min-h-[44px] px-4 md:px-5 text-sm md:text-base font-mono font-bold uppercase tracking-wider rounded-lg border-2 flex items-center" style="color: var(--color-muted); border-color: var(--color-border); background-color: var(--color-surface-alt);">
-              Image generated
+              {videoSrc ? 'Animation generated' : 'Image generated'}
             </span>
           {/if}
           <button on:click={onEdit} class="min-h-[40px] md:min-h-[44px] px-4 md:px-5 text-sm md:text-base font-mono font-bold uppercase tracking-wider btn-retro btn-retro-secondary">Edit</button>
@@ -154,7 +170,7 @@
       {/if}
     {:else if imageSrc}
       <span class="min-h-[40px] md:min-h-[44px] px-4 md:px-5 text-sm md:text-base font-medium rounded-lg text-theme-muted/60 bg-theme-surface-alt">
-        Image generated
+        {videoSrc ? 'Animation generated' : 'Image generated'}
       </span>
     {/if}
     <button on:click={onEdit} class="min-h-[40px] md:min-h-[44px] px-4 md:px-5 text-sm md:text-base font-medium border rounded-lg hover:bg-theme-accent/5 transition-colors" style="color: var(--color-accent); border-color: var(--color-accent);">Edit</button>
